@@ -1,7 +1,7 @@
 ##### Intro
-
-This is a simple file manager, Set it up anywhere you like, you can even host it on your own server
-Run it on your network or behind a domain
+* Host your filesystem on your network, or use it as a static file server for your frontends.
+* If running in filesystem mode, it will be accessible at http://network_ip:8000, if running as static file server, it will be accessible at http://network_ip:8001
+* uploads will work with PIN in network mode, but will not work with PIN in static file server mode
 
 
 ##### Features

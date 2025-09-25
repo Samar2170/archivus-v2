@@ -64,14 +64,33 @@ type DirEntry struct {
 	NavigationPath string
 }
 
+func getRelPaths(folder, username string) (string, string, error) {
+	var relPath string
+	var folderPath string
+	if config.Config.Native {
+		var homeDir string
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return relPath, relPath, utils.HandleError("FindFiles", "Failed to get user home directory", err)
+		}
+		relPath = folder
+		folderPath = filepath.Join(homeDir, relPath)
+	} else {
+		relPath = resolveFolderName(username, folder)
+		folderPath = filepath.Join(config.Config.UploadsDir, relPath)
+	}
+	return relPath, folderPath, nil
+}
+
 func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 	user, err := models.GetUserById(userId)
 	if err != nil {
 		return nil, 0, utils.HandleError("FindFiles", "Failed to get user by API key", err)
 	}
-
-	pathFromUploadsDir := resolveFolderName(user.Username, folder)
-	folderPath := filepath.Join(config.Config.UploadsDir, pathFromUploadsDir)
+	relPath, folderPath, err := getRelPaths(folder, user.Username)
+	if err != nil {
+		return nil, 0, utils.HandleError("FindFiles", "Failed to get relative path", err)
+	}
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		return nil, 0, utils.HandleError("FindFiles", "Failed to read directory", err)
@@ -89,16 +108,16 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 	} else {
 		backendAddr = fmt.Sprintf("%s://%s", config.GetBackendScheme(), config.GetBackendAddr())
 	}
-	fmdMap, err := getFileMetadatas(&files, pathFromUploadsDir)
+	fmdMap, err := getFileMetadatas(&files, relPath)
 	if err != nil {
 		logging.Errorlogger.Error().Msgf("Failed to get file metadatas: %v", err)
 	}
 	for _, file := range files {
-		signedUrl, err := GetSignedUrl(pathFromUploadsDir+"/"+file.Name(), user.ID.String())
+		signedUrl, err := GetSignedUrl(relPath+"/"+file.Name(), user.ID.String())
 		if err != nil {
 			signedUrl = ""
 		}
-		fmd, exists := fmdMap[filepath.Join(pathFromUploadsDir, file.Name())]
+		fmd, exists := fmdMap[filepath.Join(relPath, file.Name())]
 		var fmdId uint
 		if exists {
 			fmdId = fmd.ID
@@ -108,7 +127,7 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		entries = append(entries, DirEntry{
 			ID:        fmdId,
 			Name:      file.Name(),
-			Path:      pathFromUploadsDir + "/" + file.Name(),
+			Path:      relPath + "/" + file.Name(),
 			IsDir:     file.IsDir(),
 			Extension: filepath.Ext(file.Name()),
 			SignedUrl: backendAddr + "/files/download/" + signedUrl,
@@ -116,7 +135,7 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		})
 	}
 	var folderSize float64
-	folderData, err := models.GetDirByPathorName(pathFromUploadsDir, folder, user.ID.String())
+	folderData, err := models.GetDirByPathorName(relPath, folder, user.ID.String())
 	if err == nil {
 		folderSize = folderData.SizeInMb
 	}

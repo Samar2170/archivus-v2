@@ -39,7 +39,7 @@ func syncFileForUser(user models.User) {
 
 }
 
-func syncFiles() error {
+func syncFilesUserLevel() error {
 	var users []models.User
 	err := db.StorageDB.Find(&users).Error
 	if err != nil {

@@ -1,12 +1,10 @@
 package service
 
 import (
-	"archivus/config"
 	"archivus/internal/db"
 	"archivus/internal/models"
 	"archivus/internal/utils"
 	"os"
-	"path/filepath"
 )
 
 // func MoveFolder(userId, folder, dest string) error {
@@ -63,7 +61,10 @@ func DeleteFolder(userId, folder string) error {
 	if err != nil {
 		return utils.HandleError("DeleteFolder", "Failed to get user by ID", err)
 	}
-	folderPath := filepath.Join(config.Config.UploadsDir, folder)
+	_, folderPath, err := getRelPaths(folder, user.Username)
+	if err != nil {
+		return utils.HandleError("DeleteFolder", "Failed to get relative path", err)
+	}
 	var fmds []models.FileMetadata
 	err = db.StorageDB.Model(&models.FileMetadata{}).Where("user_id = ? AND file_path LIKE ?", user.ID, folderPath+"%").Find(&fmds).Error
 	if err != nil {

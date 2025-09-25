@@ -15,6 +15,7 @@ type HostingConfiguration struct {
 
 type Configuration struct {
 	Mode            string               `yaml:"mode"`
+	Native          bool                 `yaml:"native"`
 	LogsDir         string               `yaml:"logs_dir"`
 	StorageDbFile   string               `yaml:"storage_db_file"`
 	SecretKey       string               `yaml:"secret_key"`
@@ -48,7 +49,15 @@ func LoadConfig(filePath string) error {
 		Config.UploadsDir = filepath.Join(BaseDir, Config.UploadsDir)
 	}
 	if Config.UploadsDir == "" {
-		Config.UploadsDir = filepath.Join(BaseDir, "uploads")
+		if Config.Native {
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				return err
+			}
+			Config.UploadsDir = homeDir
+		} else {
+			Config.UploadsDir = filepath.Join(BaseDir, "uploads")
+		}
 	}
 	return nil
 }
@@ -62,13 +71,13 @@ const (
 
 func init() {
 	var err error
-	// currentFile, err := os.Executable()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	currentFile, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
 
-	// BaseDir = filepath.Dir(currentFile)
-	BaseDir = "/Users/samararora/Desktop/PROJECTS/archivus/"
+	BaseDir = filepath.Dir(filepath.Dir(currentFile))
+	// BaseDir = "/Users/samararora/Desktop/PROJECTS/archivus/"
 	err = LoadConfig(BaseDir + "config.yaml")
 	if err != nil {
 		panic("Failed to load configuration: " + err.Error())

@@ -42,10 +42,12 @@ func CreateUser(username, password, pin, email string) (string, string, error) {
 		tx.Rollback()
 		return "", "", utils.HandleError("CreateUser", "Failed to create user in database", err)
 	}
-	err = helpers.CreateFolder(user.Username, "")
-	if err != nil {
-		tx.Rollback()
-		return "", "", utils.HandleError("CreateUser", "Failed to create user folder", err)
+	if !config.Config.Native {
+		err = helpers.CreateFolder(user.Username, "")
+		if err != nil {
+			tx.Rollback()
+			return "", "", utils.HandleError("CreateUser", "Failed to create user folder", err)
+		}
 	}
 	if err := tx.Commit().Error; err != nil {
 		return "", "", utils.HandleError("CreateUser", "Failed to commit transaction", err)

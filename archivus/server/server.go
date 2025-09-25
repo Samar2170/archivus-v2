@@ -29,7 +29,10 @@ func GetServer(testEnv bool) *http.Server {
 	mux.HandleFunc("/login/", Login).Methods("POST")
 	mux.HandleFunc("/health-check/", HealthCheck)
 
-	mux.HandleFunc("/files/list/", GetFilesHandler)
+	if !config.Config.Native {
+		mux.HandleFunc("/files/list/", GetFilesHandler)
+	}
+
 	mux.HandleFunc("/files/get/", GetFilesByFolder)
 	mux.HandleFunc("/files/get-signed-url/{filepath:.*}", GetSignedUrlHandler)
 	mux.HandleFunc("/files/download/{filepath:.*}", DownloadFileHandler)

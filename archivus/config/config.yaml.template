@@ -1,4 +1,5 @@
 mode: dev
+native: true
 logs_dir: logs
 storage_db_file: storage.db
 secret_key: your_secret_key_here

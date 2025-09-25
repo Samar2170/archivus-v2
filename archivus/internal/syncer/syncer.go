@@ -1,6 +1,7 @@
 package syncer
 
 import (
+	"archivus/config"
 	"archivus/internal/db"
 	"archivus/internal/helpers"
 	"archivus/internal/service"
@@ -14,18 +15,24 @@ func Sync() error {
 		fmt.Printf("StorageDB not initialized\n")
 		return nil
 	}
-	err := syncUsers()
-	if err != nil {
-		logging.Errorlogger.Error().Msgf("Error syncing users: %v", err)
-		fmt.Printf("Error syncing users: %s\n", err)
-		return err
+	if !config.Config.Native {
+		err := syncUsers()
+		if err != nil {
+			logging.Errorlogger.Error().Msgf("Error syncing users: %v", err)
+			fmt.Printf("Error syncing users: %s\n", err)
+			return err
+		}
+		err = syncFilesUserLevel()
+		if err != nil {
+			logging.Errorlogger.Error().Msgf("Error syncing files: %v", err)
+			fmt.Printf("Error syncing files: %s\n", err)
+			return err
+		}
+		return nil
 	}
-	err = syncFiles()
-	if err != nil {
-		logging.Errorlogger.Error().Msgf("Error syncing files: %v", err)
-		fmt.Printf("Error syncing files: %s\n", err)
-		return err
-	}
+	// TODO: ADD NON USER SYNC
+	// non user sync
+
 	return nil
 }
 
