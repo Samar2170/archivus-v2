@@ -9,4 +9,6 @@ const (
 	PasswordMinLength = 8
 	PinLelength       = 6
 	CredsFile         = "creds.json"
+	DefaultUserDir    = "users"
+	UserInfoFileName  = ".userinfo.json"
 )

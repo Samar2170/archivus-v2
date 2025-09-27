@@ -15,7 +15,7 @@ func ReGenerateAPIKey(username, password, pin string) (string, error) {
 	if err != nil {
 		return "", utils.HandleError("ReGenerateAPIKey", "Failed to generate new API key", err)
 	}
-	err = db.StorageDB.Where("username = ?", username).Where("pin = ?", pin).First(&user).Error
+	err = db.StorageDB.Where("username = ?", username).Where("pin = ?", utils.HashString(pin)).First(&user).Error
 	if err != nil {
 		err = db.StorageDB.Where("username = ?", username).Where("password = ?", utils.HashString(password)).First(&user).Error
 		if err != nil {

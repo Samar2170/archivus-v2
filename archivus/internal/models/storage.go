@@ -14,11 +14,11 @@ type Tags struct {
 }
 
 type FileMetadata struct {
-	ID       uint      `gorm:"primaryKey"`
-	Name     string    `gorm:"index"`
-	FilePath string    `gorm:"index"`
-	UserID   uuid.UUID `gorm:"index"`
-	User     User
+	ID         uint      `gorm:"primaryKey"`
+	Name       string    `gorm:"index"`
+	AbsPath    string    `gorm:"index"`
+	UploadedBy uuid.UUID `gorm:"index"`
+
 	SizeInMb float64
 	IsPublic bool
 
@@ -41,15 +41,11 @@ type Directory struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	LastError   string
-	HasError    bool `gorm:"default:false"`
-	IsMasterDir bool `gorm:"default:false"`
-}
+	LastError string
+	HasError  bool `gorm:"default:false"`
 
-func GetOrCreateDir(userId uuid.UUID, name string, isMasterDir bool) Directory {
-	var dir Directory
-	db.StorageDB.FirstOrCreate(&dir, Directory{UserID: userId, Name: name, IsMasterDir: isMasterDir})
-	return dir
+	IsUserDir   bool `gorm:"default:false"`
+	IsMasterDir bool `gorm:"default:false"`
 }
 
 func GetDirByPathorName(path, name, userId string) (Directory, error) {
@@ -57,4 +53,10 @@ func GetDirByPathorName(path, name, userId string) (Directory, error) {
 	err := db.StorageDB.Where("name = ? OR path = ?", name, path).Where("user_id = ? ", userId).Find(&dir).Error
 	return dir, err
 
+}
+
+func GetOrCreateDir(userId uuid.UUID, name string, isUserDir bool) Directory {
+	var dir Directory
+	db.StorageDB.FirstOrCreate(&dir, Directory{UserID: userId, Name: name, IsUserDir: isUserDir})
+	return dir
 }

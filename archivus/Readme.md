@@ -1,8 +1,14 @@
 ##### Intro
 * Host your filesystem on your network, or use it as a static file server for your frontends.
-* If running in filesystem mode, it will be accessible at http://network_ip:8000, if running as static file server, it will be accessible at http://network_ip:8001
-* uploads will work with PIN in network mode, but will not work with PIN in static file server mode
+* If running in filesystem mode, it will be accessible at http://network_ip:8000.
+* uploads will work with PIN in network mode
 
+
+#### Configurations
+1. Multiple Users? UserDir Setup?
+2. RW Access?
+3. Master PIN or User LogIn for Uploads? 
+4. UserDir setup and Lock?
 
 ##### Features
 1. Upload Multiple Files
@@ -12,10 +18,15 @@
 5. Get Signed Url to Download Files
 6. Use as static file server for your frontends
 
+##### Setup
+1. Create Master User
+2. Each user dir will have .userinfo file
+
+
 
 ##### Usage
-1. Archivus uses a UploadDirectory as its root directory
-2. Each user has his own master directory inside the UploadDirectory
+1. ArchivusV2 uses a HomeDirectory as its master directory
+2. Each user can have his own master directory inside the MasterDirectory
 3. User can create/manage his own filesystem inside the master directory
 
 

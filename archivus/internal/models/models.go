@@ -15,6 +15,9 @@ type User struct {
 	Email    string    `gorm:"uniqueIndex;"`
 	APIKey   string    `gorm:"uniqueIndex;not null"`
 	PIN      string    `gorm:"not null"` // Personal Identification Number for user authentication
+
+	UserDirLock bool `gorm:"default:false"`
+	IsMaster    bool `gorm:"default:false"`
 }
 
 func GetUserById(id string) (User, error) {
@@ -30,8 +33,9 @@ func GetUserByUsername(username string) (User, error) {
 
 type UserPreference struct {
 	*gorm.Model
-	User           User `gorm:"foreignKey:UserID"`
-	UserID         uuid.UUID
-	CompressImages bool `gorm:"default:false"`
-	AddWebpVersion bool `gorm:"default:false"`
+	User              User `gorm:"foreignKey:UserID"`
+	UserID            uuid.UUID
+	CompressImages    bool `gorm:"default:false"`
+	AddWebpVersion    bool `gorm:"default:false"`
+	GlobalWriteAccess bool `gorm:"default:false"`
 }

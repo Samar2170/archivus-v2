@@ -6,14 +6,11 @@ import (
 	"archivus/internal/helpers"
 	"archivus/internal/models"
 	"archivus/internal/utils"
-	"archivus/pkg/logging"
-	"fmt"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-func CreateUser(username, password, pin, email string) (string, string, error) {
+func CreateUser(username, password, pin, email string, isMaster bool) (string, string, error) {
 	// Validate input
 	if username == "" || pin == "" || email == "" || password == "" {
 		return "", "", utils.HandleError("CreateUser", "Username, PIN, and email cannot be empty", nil)
@@ -29,7 +26,6 @@ func CreateUser(username, password, pin, email string) (string, string, error) {
 	hashedPin := utils.HashString(pin)
 	hashedPassword := utils.HashString(password)
 	tx := db.StorageDB.Begin()
-	// Create user in the database
 	user := models.User{
 		ID:       uuid.New(),
 		Username: username,
@@ -37,13 +33,14 @@ func CreateUser(username, password, pin, email string) (string, string, error) {
 		Email:    email,
 		APIKey:   apiKey,
 		Password: hashedPassword,
+		IsMaster: isMaster,
 	}
 	if err := tx.Create(&user).Error; err != nil {
 		tx.Rollback()
 		return "", "", utils.HandleError("CreateUser", "Failed to create user in database", err)
 	}
-	if !config.Config.Native {
-		err = helpers.CreateFolder(user.Username, "")
+	if config.Config.UserDirStructure {
+		err = helpers.CreateFolderForUser(user.Username)
 		if err != nil {
 			tx.Rollback()
 			return "", "", utils.HandleError("CreateUser", "Failed to create user folder", err)
@@ -103,54 +100,54 @@ type Credential struct {
 	ApiKey   string `json:"api_key"`
 }
 
-func CreateUserByMasterPerm(userFolder string) (Credential, error) {
-	var cd Credential
-	cd.Username = userFolder
-	apiKey, err := utils.GenerateAPIKey(config.ApiKeyLength)
-	if err != nil {
-		logging.Errorlogger.Error().Msgf("Error generating API key: %v", err)
-		fmt.Printf("Error generating %s API key: %s", userFolder, err)
-		return cd, err
-	}
-	cd.ApiKey = apiKey
-	password, err := utils.GenerateAPIKey(config.PasswordMinLength)
-	if err != nil {
-		logging.Errorlogger.Error().Msgf("Error generating password: %v", err)
-		fmt.Printf("Error generating %s password: %s", userFolder, err)
-		return cd, err
-	}
-	cd.Password = password
-	pin, err := utils.GenerateRandomNumber(config.PinLelength)
-	if err != nil {
-		logging.Errorlogger.Error().Msgf("Error generating PIN: %v", err)
-		fmt.Printf("Error generating %s PIN: %s", userFolder, err)
-		return cd, err
-	}
-	cd.PIN = pin
-	tx := db.StorageDB.Begin()
-	var existingUser models.User
-	err = db.StorageDB.Where("username = ?", userFolder).First(&existingUser).Error
-	if err != gorm.ErrRecordNotFound {
-		tx.Rollback()
-		logging.Errorlogger.Error().Msgf("Error creating user for %s: %v", userFolder, err)
-		fmt.Printf("Error searching for existing user for %s: %s\n", userFolder, err)
-		return cd, err
-	}
-	tx.Create(&models.User{
-		ID:       uuid.New(),
-		Username: userFolder,
-		Email:    userFolder + "@placeholder.com",
-		PIN:      utils.HashString(pin),
-		Password: utils.HashString(password),
-		APIKey:   apiKey,
-	})
-	err = tx.Commit().Error
-	if err != nil {
-		logging.Errorlogger.Error().Msgf("Error creating user for %s: %v", userFolder, err)
-		fmt.Printf("Error creating user for %s: %s\n", userFolder, err)
-		return cd, err
-	} else {
-		fmt.Printf("User created for %s with API key: %s\n", userFolder, apiKey)
-		return cd, err
-	}
-}
+// func CreateUserByMasterPerm(userFolder string) (Credential, error) {
+// 	var cd Credential
+// 	cd.Username = userFolder
+// 	apiKey, err := utils.GenerateAPIKey(config.ApiKeyLength)
+// 	if err != nil {
+// 		logging.Errorlogger.Error().Msgf("Error generating API key: %v", err)
+// 		fmt.Printf("Error generating %s API key: %s", userFolder, err)
+// 		return cd, err
+// 	}
+// 	cd.ApiKey = apiKey
+// 	password, err := utils.GenerateAPIKey(config.PasswordMinLength)
+// 	if err != nil {
+// 		logging.Errorlogger.Error().Msgf("Error generating password: %v", err)
+// 		fmt.Printf("Error generating %s password: %s", userFolder, err)
+// 		return cd, err
+// 	}
+// 	cd.Password = password
+// 	pin, err := utils.GenerateRandomNumber(config.PinLelength)
+// 	if err != nil {
+// 		logging.Errorlogger.Error().Msgf("Error generating PIN: %v", err)
+// 		fmt.Printf("Error generating %s PIN: %s", userFolder, err)
+// 		return cd, err
+// 	}
+// 	cd.PIN = pin
+// 	tx := db.StorageDB.Begin()
+// 	var existingUser models.User
+// 	err = db.StorageDB.Where("username = ?", userFolder).First(&existingUser).Error
+// 	if err != gorm.ErrRecordNotFound {
+// 		tx.Rollback()
+// 		logging.Errorlogger.Error().Msgf("Error creating user for %s: %v", userFolder, err)
+// 		fmt.Printf("Error searching for existing user for %s: %s\n", userFolder, err)
+// 		return cd, err
+// 	}
+// 	tx.Create(&models.User{
+// 		ID:       uuid.New(),
+// 		Username: userFolder,
+// 		Email:    userFolder + "@placeholder.com",
+// 		PIN:      utils.HashString(pin),
+// 		Password: utils.HashString(password),
+// 		APIKey:   apiKey,
+// 	})
+// 	err = tx.Commit().Error
+// 	if err != nil {
+// 		logging.Errorlogger.Error().Msgf("Error creating user for %s: %v", userFolder, err)
+// 		fmt.Printf("Error creating user for %s: %s\n", userFolder, err)
+// 		return cd, err
+// 	} else {
+// 		fmt.Printf("User created for %s with API key: %s\n", userFolder, apiKey)
+// 		return cd, err
+// 	}
+// }
