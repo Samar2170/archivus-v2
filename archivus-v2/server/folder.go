@@ -22,6 +22,7 @@ func CreateFolderHandler(w http.ResponseWriter, r *http.Request) {
 		response.ForbiddenResponse(w, "User does not have write access")
 		return
 	}
+
 	type CreateFolderRequest struct {
 		Folder string
 	}

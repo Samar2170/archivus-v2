@@ -126,6 +126,9 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		} else {
 			fmdId = 0
 		}
+		if file.Name()[0] == '.' {
+			continue
+		}
 		entries = append(entries, DirEntry{
 			ID:        fmdId,
 			Name:      file.Name(),
