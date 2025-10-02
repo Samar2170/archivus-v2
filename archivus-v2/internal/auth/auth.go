@@ -3,7 +3,7 @@ package auth
 import (
 	"archivus-v2/config"
 	"archivus-v2/internal/db"
-	dirmanager "archivus-v2/internal/dirManager"
+	"archivus-v2/internal/dirmanager"
 	"archivus-v2/internal/models"
 	"archivus-v2/internal/utils"
 	"errors"
@@ -52,4 +52,52 @@ func CreateUser(username, password, pin, email string, createDir, isMaster bool)
 	}
 
 	return apiKey, user.ID.String(), nil
+}
+
+type LoginUserRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	PIN      string `json:"pin"`
+}
+
+func LoginUser(req LoginUserRequest) (string, string, error) {
+	var user models.User
+	var err error
+	var token string
+	var userId string
+	if req.Username == "" || (req.Password == "" && req.PIN == "") {
+		return token, userId, utils.HandleError("LoginUser", "Username, password, and PIN cannot be empty", nil)
+	}
+	if req.PIN == "" {
+		err = db.StorageDB.Where("username = ?", req.Username).
+			Where("password = ?", utils.HashString(req.Password)).
+			First(&user).Error
+	} else {
+		err = db.StorageDB.Where("username = ?", req.Username).
+			Where("pin = ?", utils.HashString(req.PIN)).
+			First(&user).Error
+	}
+	userId = user.ID.String()
+	if err != nil {
+		return token, userId, utils.HandleError("LoginUser", "Invalid credentials", err)
+	}
+	token, err = createToken(user.ID.String(), user.Username)
+	if err != nil {
+		return token, userId, utils.HandleError("LoginUser", "Failed to create token", err)
+	}
+	return token, userId, nil
+}
+
+func ToggleUserSettingsByMaster(user models.User, userDirLock, writeAccess bool) error {
+	var err error
+	tx := db.StorageDB.Begin()
+	user.UserDirLock = userDirLock
+	user.WriteAccess = writeAccess
+	err = tx.Save(&user).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit().Error
+	return err
 }

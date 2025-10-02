@@ -1,8 +1,10 @@
 package shell
 
 import (
+	"archivus-v2/config"
 	"archivus-v2/internal"
 	"archivus-v2/internal/auth"
+	"archivus-v2/internal/models"
 	"bufio"
 	"fmt"
 	"log"
@@ -70,11 +72,11 @@ func createNewUser(username, password, pin, email string, isMaster, createDir bo
 
 func NewUser() {
 	internal.Setup(false)
-	username := getUserInput("Enter username (at least 3 characters): ", "test")
-	password := getUserInput("Enter password (at least 6 characters): ", "123456")
-	pin := getUserInput("Enter pin (exactly 6 digits): ", "123456")
+	username := getUserInput("Enter username (at least 3 characters): ", "")
+	password := getUserInput("Enter password (at least 6 characters): ", "")
+	pin := getUserInput("Enter pin (exactly 6 digits): ", "")
 	email := getUserInput("Enter email address: ", "")
-	isMasterUser := getUserInput("Is this a master user? (y/n): ", "y")
+	isMasterUser := getUserInput("Is this a master user? (y/n): ", "n")
 	var isMaster bool
 	if strings.ToLower(isMasterUser) == "y" {
 		isMaster = true
@@ -97,4 +99,40 @@ func NewUser() {
 	if err != nil {
 		log.Fatalf("Error creating user: %v", err)
 	}
+}
+
+func ConvertToBool(value string) bool {
+	if value == "true" || value == "1" || value == "y" || value == "yes" {
+		return true
+	}
+	return false
+}
+
+func ToggleUserSettings() {
+	internal.Setup(false)
+	masterPin := getUserInput("Enter master pin: ", "")
+	if masterPin != config.Config.MasterPin {
+		log.Fatalf("Invalid master pin")
+	}
+	username := getUserInput("Enter username (at least 3 characters): ", "")
+	user, err := models.GetUserByUsername(username)
+	if err != nil {
+		log.Fatalf("User not found: %v", err)
+	}
+
+	fmt.Println("Current settings:")
+	fmt.Printf("Username: %s\n", user.Username)
+	fmt.Printf("Email: %s\n", user.Email)
+	fmt.Printf("Is master: %v\n", user.IsMaster)
+	fmt.Printf("UserDir Lock: %v\n", user.UserDirLock)
+
+	fmt.Println("Enter new settings:")
+
+	userDirLock := getUserInput("UserDir Lock (true/false): ", fmt.Sprintf("%v", user.UserDirLock))
+	writeAccess := getUserInput("Write Access (true/false): ", fmt.Sprintf("%v", user.WriteAccess))
+	err = auth.ToggleUserSettingsByMaster(user, ConvertToBool(userDirLock), ConvertToBool(writeAccess))
+	if err != nil {
+		log.Fatalf("Error toggling user settings: %v", err)
+	}
+	fmt.Println("User settings toggled successfully!")
 }

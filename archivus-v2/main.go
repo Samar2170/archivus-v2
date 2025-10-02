@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archivus-v2/server"
 	"archivus-v2/shell"
 	"fmt"
 	"os"
@@ -13,11 +14,7 @@ func main() {
 	serverCmd := parser.NewCommand("server", "Run the archivus server")
 	newUserCmd := parser.NewCommand("new-user", "Create a new master user")
 	featureCmd := parser.NewCommand("feature", "Add a new feature")
-	// task := parser.StringPositional(
-	// 	&argparse.Options{
-	// 		Required: true,
-	// 		Default:  "server",
-	// 	})
+	toggleUserSettingsCmd := parser.NewCommand("user-settings", "Toggle user settings")
 	m := parser.String("m", "mode", &argparse.Options{
 		Required: false,
 		Help:     "Mode: 'archive' or 'extract'",
@@ -30,17 +27,16 @@ func main() {
 	switch {
 	case serverCmd.Happened():
 		fmt.Println("Starting server...")
+		server.RunServer()
 	case newUserCmd.Happened():
 		fmt.Println("Creating new master user...")
 		shell.NewUser()
 	case featureCmd.Happened():
 		fmt.Println("Adding new feature...")
-		// internal.Setup(false)
-		// auth.CreateUser("test", "test", "123456", "test", true, true)
-		shell.NewUser()
+	case toggleUserSettingsCmd.Happened():
+		shell.ToggleUserSettings()
 	default:
 		fmt.Println("No command provided. Use -h for help.")
 	}
-
 	fmt.Println("Mode:", *m)
 }

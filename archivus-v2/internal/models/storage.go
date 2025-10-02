@@ -14,10 +14,14 @@ type Tags struct {
 }
 
 type FileMetadata struct {
-	ID         uint      `gorm:"primaryKey"`
-	Name       string    `gorm:"index"`
-	AbsPath    string    `gorm:"index"`
-	UploadedBy uuid.UUID `gorm:"index"`
+	ID           uint   `gorm:"primaryKey"`
+	Name         string `gorm:"index"`
+	AbsPath      string `gorm:"index"`
+	RelPath      string
+	UploadedBy   User `gorm:"foreignKey:UploadedByID"`
+	UploadedByID uuid.UUID
+	Owner        User `gorm:"foreignKey:OwnerID"`
+	OwnerID      uuid.UUID
 
 	SizeInMb float64
 	IsPublic bool
@@ -48,9 +52,9 @@ type Directory struct {
 	IsMasterDir bool `gorm:"default:false"`
 }
 
-func GetDirByPathorName(path, name, userId string) (Directory, error) {
+func GetDirByPathorName(path, userId string) (Directory, error) {
 	var dir Directory
-	err := db.StorageDB.Where("name = ? OR path = ?", name, path).Where("user_id = ? ", userId).Find(&dir).Error
+	err := db.StorageDB.Where("path = ?", path).Where("user_id = ? ", userId).Find(&dir).Error
 	return dir, err
 
 }

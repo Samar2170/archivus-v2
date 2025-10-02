@@ -16,7 +16,8 @@ type User struct {
 	APIKey   string    `gorm:"uniqueIndex;not null"`
 	PIN      string    `gorm:"not null"` // Personal Identification Number for user authentication
 
-	UserDirLock bool `gorm:"default:false"`
+	WriteAccess bool `gorm:"default:false"`
+	UserDirLock bool `gorm:"default:true"`
 	IsMaster    bool `gorm:"default:false"`
 }
 
@@ -28,6 +29,12 @@ func GetUserById(id string) (User, error) {
 func GetUserByUsername(username string) (User, error) {
 	var user User
 	err := db.StorageDB.Where("username = ?", username).First(&user).Error
+	return user, err
+}
+
+func GetUserByApiKey(apiKey string) (User, error) {
+	var user User
+	err := db.StorageDB.Where("api_key = ?", apiKey).First(&user).Error
 	return user, err
 }
 
