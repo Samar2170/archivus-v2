@@ -1,0 +1,66 @@
+package models
+
+import (
+	"archivus-v2/internal/db"
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
+type Tags struct {
+	ID  uint   `gorm:"primaryKey"`
+	Tag string `gorm:"uniqueIndex"`
+}
+
+type FileMetadata struct {
+	ID           uint   `gorm:"primaryKey"`
+	Name         string `gorm:"index"`
+	AbsPath      string `gorm:"index"`
+	RelPath      string
+	UploadedBy   User `gorm:"foreignKey:UploadedByID"`
+	UploadedByID uuid.UUID
+	Owner        User `gorm:"foreignKey:OwnerID"`
+	OwnerID      uuid.UUID
+
+	SizeInMb float64
+	IsPublic bool
+
+	Tags []Tags `gorm:"many2many:file_metadata_tags;"`
+
+	IsImage                    bool
+	CompressedVersionAvailable bool `gorm:"default:false"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Directory struct {
+	*gorm.Model
+	Name      string
+	Path      string
+	UserID    uuid.UUID
+	User      User
+	SizeInMb  float64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	LastError string
+	HasError  bool `gorm:"default:false"`
+
+	IsUserDir   bool `gorm:"default:false"`
+	IsMasterDir bool `gorm:"default:false"`
+}
+
+func GetDirByPathorName(path, userId string) (Directory, error) {
+	var dir Directory
+	err := db.StorageDB.Where("path = ?", path).Where("user_id = ? ", userId).Find(&dir).Error
+	return dir, err
+
+}
+
+func GetOrCreateDir(userId uuid.UUID, name string, isUserDir bool) Directory {
+	var dir Directory
+	db.StorageDB.FirstOrCreate(&dir, Directory{UserID: userId, Name: name, IsUserDir: isUserDir})
+	return dir
+}

@@ -13,7 +13,7 @@ export default function FileCard({ file }:{file:FileMetaData}) {
     const isDir = file.IsDir;
   
     return (
-<div className="w-44 rounded-2xl shadow-sm p-4 flex flex-col items-center gap-3 
+<div className="w-44 p-4 flex flex-col items-center gap-3 
   hover:shadow-lg hover:-translate-y-1 transition-all duration-200 ">
   
   {isDir ? (
@@ -27,7 +27,7 @@ export default function FileCard({ file }:{file:FileMetaData}) {
         alt={file.Name}
         width={80}
         height={80}
-        className="rounded-lg object-cover w-20 h-20 shadow-sm"
+        className="object-cover w-20 h-20"
       />
     </Link>
   ) : (

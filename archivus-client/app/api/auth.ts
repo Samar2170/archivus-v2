@@ -7,7 +7,7 @@ export interface SigninResponse {
 }
 
 export function signin(username: string, password: string, pin: string) {
-  return apiFetch<SigninResponse>(`${BASE_URL}login/`, {
+  return apiFetch<SigninResponse>(`${BASE_URL}login`, {
     method: "POST",
     body: JSON.stringify({ username, password, pin }),
   });
