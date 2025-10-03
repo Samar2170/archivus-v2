@@ -92,7 +92,12 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 	}
 
 	// pathFromUploadsDir := resolveFolderName(user.Username, folder)
-	folderPath := filepath.Join(config.Config.BaseDir, folder)
+	var folderPath string
+	if user.UserDirLock {
+		folderPath = filepath.Join(config.Config.BaseDir, user.Username, folder)
+	} else {
+		folderPath = filepath.Join(config.Config.BaseDir, folder)
+	}
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		return nil, 0, utils.HandleError("FindFiles", "Failed to read directory", err)
@@ -115,7 +120,7 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		logging.Errorlogger.Error().Msgf("Failed to get file metadatas: %v", err)
 	}
 	for _, file := range files {
-		signedUrl, err := GetSignedUrl(folder+"/"+file.Name(), user.ID.String())
+		signedUrl, err := GetSignedUrl(filepath.Join(folder, file.Name()), user.ID.String())
 		if err != nil {
 			signedUrl = ""
 		}
@@ -132,7 +137,7 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		entries = append(entries, DirEntry{
 			ID:        fmdId,
 			Name:      file.Name(),
-			Path:      folder + "/" + file.Name(),
+			Path:      filepath.Join(folder, file.Name()),
 			IsDir:     file.IsDir(),
 			Extension: filepath.Ext(file.Name()),
 			SignedUrl: backendAddr + "/files/download/" + signedUrl,
