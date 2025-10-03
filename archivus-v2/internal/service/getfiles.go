@@ -92,7 +92,12 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 	}
 
 	// pathFromUploadsDir := resolveFolderName(user.Username, folder)
-	folderPath := filepath.Join(config.Config.BaseDir, folder)
+	var folderPath string
+	if user.UserDirLock {
+		folderPath = filepath.Join(config.Config.BaseDir, user.Username, folder)
+	} else {
+		folderPath = filepath.Join(config.Config.BaseDir, folder)
+	}
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		return nil, 0, utils.HandleError("FindFiles", "Failed to read directory", err)
