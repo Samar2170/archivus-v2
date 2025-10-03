@@ -16,7 +16,7 @@ import (
 
 func GetSignedUrl(filePath string, userId string) (string, error) {
 	var fmd models.FileMetadata
-	db.StorageDB.Where("file_path = ? AND user_id = ?", filePath, userId).First(&fmd)
+	db.StorageDB.Where("rel_path = ? AND user_id = ?", filePath, userId).First(&fmd)
 
 	expiresAt := time.Now().Add(600 * time.Minute).Unix()
 	expriresAtStr := fmt.Sprintf("%d", expiresAt)
