@@ -21,6 +21,8 @@ config.yaml
 *.db
 
 
+archivus-v2
+
 **/__test__dir__/**
 
 
