@@ -28,8 +28,6 @@ import { useSearchParams, useRouter } from 'next/navigation'
 
 const navigation = [
   {name: 'Home', href: '/', icon: HomeIcon, current: false },
-  { name: 'Add Folder', href: '/addFolder', icon: FolderIcon, current: true },
-  { name: 'Upload Files', href: '/uploads', icon: ClipboardDocumentIcon, current: false },
   { name: 'List Files', href: '/list', icon: ListBulletIcon, current: false },
 ]
 const teams = [
