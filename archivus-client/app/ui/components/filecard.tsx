@@ -13,13 +13,13 @@ export default function FileCard({ file }:{file:FileMetaData}) {
     const isDir = file.IsDir;
   
     return (
-<div className="w-44 p-4 flex flex-col items-center gap-3 
+<div className="w-auto flex flex-col items-center gap-3 
   hover:shadow-lg hover:-translate-y-1 transition-all duration-200 ">
   
   {isDir ? (
-    <Link href={`/?folder=${file.Path}`} className="flex flex-col items-center">
-      <Folder className="w-20 h-20 text-blue-500" />
-    </Link>
+    // <Link href={`/?folder=${file.Path}`} className="flex flex-col items-center">
+      <Folder className="w-30 h-30 text-blue-500" />
+    // </Link> 
   ) : file.SignedUrl && file.Extension.match(/(png|jpg|jpeg|gif)$/i) ? (
     <Link href={file.SignedUrl} className="flex flex-col items-center">
       <Image
@@ -27,12 +27,12 @@ export default function FileCard({ file }:{file:FileMetaData}) {
         alt={file.Name}
         width={80}
         height={80}
-        className="object-cover w-20 h-20"
+        className="object-cover w-30 h-30"
       />
     </Link>
   ) : (
     <Link href={file.SignedUrl} className="flex flex-col items-center">
-      <FileIcon className="w-16 h-16 text-gray-500" />
+      <FileIcon className="w-25 h-25 text-gray-500" />
     </Link>
   )}
 

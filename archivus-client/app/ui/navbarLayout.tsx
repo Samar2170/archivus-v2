@@ -26,6 +26,9 @@ function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(' ')
 }
 
+
+
+
 export default function NavbarLayout({children}: {children: React.ReactNode}) {
     const [navItems, setNavItems] = useState(navigation)
     const {user} = useAuthStore();
