@@ -9,52 +9,57 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func MoveFile(userId, filePath, destFolder string, copy bool) error {
 	// Implement the logic to move the file to the specified folder
 	// This is a placeholder for the actual implementation
-	var fileMd models.FileMetadata
-	err := db.StorageDB.Model(&models.FileMetadata{}).Where("rel_path = ? AND uploaded_by_id = ?", filePath, userId).First(&fileMd).Error
-	if err != nil {
-		logging.Errorlogger.Error().Msgf("Error retrieving file metadata: %v", err)
-		return utils.HandleError("Move File", "Failed to retrieve file metadata", err)
+	// var fileMd models.FileMetadata
+	// err := db.StorageDB.Model(&models.FileMetadata{}).Where("rel_path = ? AND uploaded_by_id = ?", filePath, userId).First(&fileMd).Error
+	// if err != nil {
+	// 	logging.Errorlogger.Error().Msgf("Error retrieving file metadata: %v", err)
+	// 	return utils.HandleError("Move File", "Failed to retrieve file metadata", err)
+	// }
+	// tx := db.StorageDB.Begin()
+	if filePath == "" || destFolder == "" {
+		return utils.HandleError("Move File", "File path or destination folder is empty", nil)
 	}
-	tx := db.StorageDB.Begin()
-	newFilePath := filepath.Join(config.Config.BaseDir, destFolder, fileMd.Name)
+	fileName := strings.Split(filePath, "/")[len(strings.Split(filePath, "/"))-1]
+	newFilePath := filepath.Join(config.Config.BaseDir, destFolder, fileName)
 	newFile, err := os.Create(newFilePath)
 	if err != nil {
-		tx.Rollback()
+		// tx.Rollback()
 		logging.Errorlogger.Error().Msgf("Error creating new file: %v", err)
 		return utils.HandleError("Move File", "Failed to create new file", err)
 	}
 	defer newFile.Close()
-	oldFile, err := os.Open(filepath.Join(config.Config.BaseDir, fileMd.RelPath))
+	oldFile, err := os.Open(filepath.Join(config.Config.BaseDir, filePath))
 	if err != nil {
-		tx.Rollback()
+		// tx.Rollback()
 		logging.Errorlogger.Error().Msgf("Error opening old file: %v", err)
 		return utils.HandleError("Move File", "Failed to open old file", err)
 	}
 	_, err = io.Copy(newFile, oldFile)
 	if err != nil {
-		tx.Rollback()
+		// tx.Rollback()
 		logging.Errorlogger.Error().Msgf("Error moving file: %v", err)
 		return utils.HandleError("Move File", "Failed to move file", err)
 	}
 	if !copy {
-		err = os.Remove(filepath.Join(config.Config.BaseDir, fileMd.RelPath))
+		err = os.Remove(filepath.Join(config.Config.BaseDir, filePath))
 		if err != nil {
-			tx.Rollback()
+			// tx.Rollback()
 			logging.Errorlogger.Error().Msgf("Error removing old file: %v", err)
 			return utils.HandleError("Move File", "Failed to remove old file", err)
 		}
 	}
-	fileMd.RelPath = newFilePath
-	tx.Save(&fileMd)
-	if err := tx.Commit().Error; err != nil {
-		logging.Errorlogger.Error().Msgf("Error committing transaction: %v", err)
-		return utils.HandleError("Move File", "Failed to commit transaction", err)
-	}
+	// fileMd.RelPath = newFilePath
+	// tx.Save(&fileMd)
+	// if err := tx.Commit().Error; err != nil {
+	// 	logging.Errorlogger.Error().Msgf("Error committing transaction: %v", err)
+	// 	return utils.HandleError("Move File", "Failed to commit transaction", err)
+	// }
 	return nil
 }
 
