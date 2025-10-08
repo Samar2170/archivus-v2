@@ -76,7 +76,7 @@ export default function FileExplorer() {
                       }
                       file.id = generateRandomId();
                     }
-                    let fileMap = new Map<string,FileMetaData>();
+                    const fileMap = new Map<string,FileMetaData>();
                     data.files.forEach((f) => fileMap!.set(f.id,f));
                     setFiles(fileMap);
                     setSize(data.size);

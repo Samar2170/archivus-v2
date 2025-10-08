@@ -113,37 +113,37 @@ export default function FileExplorer({folder}: {folder:string}) {
       fileInputRef.current?.click(); 
     };
 
-    const handleDragStart = (event: any) => setActiveId(event.active.id);
+    // const handleDragStart = (event: any) => setActiveId(event.active.id);
 
     
-    const handleDragEnd = (event: any) => {
-      const {active,over}=event;
-      if (!over || active.id == over.id) return;
-      const overFile = files[active.id];
-      if (overFile.IsDir) {
-        alert("Cannot move a folder");
-        setActiveId(null);
-        return;
-      };
+    // const handleDragEnd = (event: any) => {
+    //   const {active,over}=event;
+    //   if (!over || active.id == over.id) return;
+    //   const overFile = files[active.id];
+    //   if (overFile.IsDir) {
+    //     alert("Cannot move a folder");
+    //     setActiveId(null);
+    //     return;
+    //   };
 
 
-      const endFile = files[over.id];
-      if (endFile.IsDir) {
-        moveFile(overFile.Path, endFile.Path).then(res => {
-          if (res) {
-            alert("File moved successfully");
-            window.location.reload();
-          }
-          setDragDisabled(true);
-        if (dragTimeout.current) clearTimeout(dragTimeout.current);
-        dragTimeout.current = setTimeout(() => setDragDisabled(false), 150);
-      }).catch(err => {
-        console.error("Error moving file", err);
-        alert("Error moving file");
-      });
-      setActiveId(null);
-    }
-  }
+  //     const endFile = files[over.id];
+  //     if (endFile.IsDir) {
+  //       moveFile(overFile.Path, endFile.Path).then(res => {
+  //         if (res) {
+  //           alert("File moved successfully");
+  //           window.location.reload();
+  //         }
+  //         setDragDisabled(true);
+  //       if (dragTimeout.current) clearTimeout(dragTimeout.current);
+  //       dragTimeout.current = setTimeout(() => setDragDisabled(false), 150);
+  //     }).catch(err => {
+  //       console.error("Error moving file", err);
+  //       alert("Error moving file");
+  //     });
+  //     setActiveId(null);
+  //   }
+  // }
   const handleDragCancel = () => setActiveId(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,8 +240,8 @@ export default function FileExplorer({folder}: {folder:string}) {
           </DialogContent>
         </Dialog>
 
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}
-        onDragStart={handleDragStart} onDragCancel={handleDragCancel} >
+      <DndContext collisionDetection={closestCenter} 
+        onDragCancel={handleDragCancel} >
         <ul role="list" className="grid grid-cols-6 gap-6 sm:grid-cols-4 lg:grid-cols-7">
       {files.map((file,indx) => (
         
