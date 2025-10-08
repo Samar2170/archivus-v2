@@ -12,12 +12,49 @@ import {
   DialogTrigger,
   DialogDescription
 } from "@/components/ui/dialog";
-
+import { DndContext, closestCenter,DragOverlay } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { moveFile } from "@/app/api/files";
 import { uploadFiles } from "@/app/api/files";
-
+import { CSS } from '@dnd-kit/utilities';
 
 const generateRandomId = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+function Draggable({id, file, dragDisabled}: {id: number, file: FileMetaData, dragDisabled: boolean}) {
+  const [isDragging, setIsDragging] = useState(false);
+  const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id});
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: transform ? 'transform 200ms cubic-bezier(0.22, 1, 0.36, 1)' : undefined,
+    pointerEvents: dragDisabled ? 'none' : 'auto'  
+  };
+
+  function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+    console.log("Clicked file:", file);
+    if (file.IsDir) {
+      event.stopPropagation();
+      window.location.href = `/?folder=${file.Path}`;
+    }
+  }
+  function handleDragStart() {
+    if (dragDisabled) return;
+    setIsDragging(true);
+  }
+
+  function handleDragEnd() {
+    setTimeout(() => setIsDragging(false), 100);
+  }
+
+
+    return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}
+      onDragStart={handleDragStart} onDragEnd={handleDragEnd} onClick={handleClick}
+    className='p-3 bg-white border rounded-md shadow cursor-move'>
+      <FileCard key={id} file={file} />
+    </div>
+  )
 }
 
 export default function FileExplorer({folder}: {folder:string}) {
@@ -33,6 +70,9 @@ export default function FileExplorer({folder}: {folder:string}) {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+    const [activeId, setActiveId] = useState<number | null>(null);
+    const [dragDisabled, setDragDisabled] = useState(false);
+    const dragTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const createFolder = async() => {
         try {
@@ -73,6 +113,38 @@ export default function FileExplorer({folder}: {folder:string}) {
       fileInputRef.current?.click(); 
     };
 
+    // const handleDragStart = (event: any) => setActiveId(event.active.id);
+
+    
+    // const handleDragEnd = (event: any) => {
+    //   const {active,over}=event;
+    //   if (!over || active.id == over.id) return;
+    //   const overFile = files[active.id];
+    //   if (overFile.IsDir) {
+    //     alert("Cannot move a folder");
+    //     setActiveId(null);
+    //     return;
+    //   };
+
+
+  //     const endFile = files[over.id];
+  //     if (endFile.IsDir) {
+  //       moveFile(overFile.Path, endFile.Path).then(res => {
+  //         if (res) {
+  //           alert("File moved successfully");
+  //           window.location.reload();
+  //         }
+  //         setDragDisabled(true);
+  //       if (dragTimeout.current) clearTimeout(dragTimeout.current);
+  //       dragTimeout.current = setTimeout(() => setDragDisabled(false), 150);
+  //     }).catch(err => {
+  //       console.error("Error moving file", err);
+  //       alert("Error moving file");
+  //     });
+  //     setActiveId(null);
+  //   }
+  // }
+  const handleDragCancel = () => setActiveId(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     
@@ -96,6 +168,7 @@ export default function FileExplorer({folder}: {folder:string}) {
         } finally {
           setUploading(false);
           setModalType(null);
+          window.location.reload();
         }
       };
     
@@ -167,12 +240,23 @@ export default function FileExplorer({folder}: {folder:string}) {
           </DialogContent>
         </Dialog>
 
-
-        <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <DndContext collisionDetection={closestCenter} 
+        onDragCancel={handleDragCancel} >
+        <ul role="list" className="grid grid-cols-6 gap-6 sm:grid-cols-4 lg:grid-cols-7">
       {files.map((file,indx) => (
-        <FileCard key={indx} file={file} />
+        
+        <Draggable key={indx} id={indx} file={file} dragDisabled={dragDisabled} />
+        
       ))}
-    </ul>      
+        </ul>      
+        <DragOverlay>
+        {activeId ? (
+          <div className="p-3 bg-white border rounded-md shadow-lg scale-105 opacity-90">
+            <Draggable id={activeId} file={files[activeId]} dragDisabled={true}/>
+          </div>
+        ) : null}
+      </DragOverlay>
+      </DndContext>
       </div>
     );
 

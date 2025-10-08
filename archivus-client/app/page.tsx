@@ -1,7 +1,7 @@
 'use client';
 import Image from "next/image";
 import { useAuth } from "./hooks/useAuth";
-import FileExplorer from "./ui/fileexplorer";
+import FileExplorer from "./ui/fileexplorer_v2";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <>
     <Suspense fallback={<p>Loading...</p>}>
-    <FileExplorer folder={folder} />
+    <FileExplorer  />
     </Suspense>
     </>
   );

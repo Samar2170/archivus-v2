@@ -1,3 +1,4 @@
+import { get } from "http";
 import { apiFetch } from "../utils/fetcher";
 
 
@@ -5,6 +6,7 @@ const BASE_URL = "http://localhost:8000/"; // adjust to match your backend
 
 
 export interface FileMetaData {
+    id: string;
     ID: string;
     Name: string;
     IsDir: boolean;
@@ -13,6 +15,7 @@ export interface FileMetaData {
     Size: number;
     Path: string;
     NavigationPath: string;
+
 }
 
 export interface ListFileMetaData {
@@ -54,5 +57,16 @@ export function uploadFiles(folder: string, files: File[]) {
 export function getFilesList(search: string) {
     return apiFetch<filesListResponse>(`${BASE_URL}files/list/?search=${search}`, {
         method: "GET",
+    });
+}
+
+export function moveFile(sourcePath: string, dst: string) {
+    const body = { filePath: sourcePath, dst: dst };
+    return apiFetch<{ success: boolean }>(`${BASE_URL}files/move/`, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+            "Content-Type": "application/json",
+        },
     });
 }
