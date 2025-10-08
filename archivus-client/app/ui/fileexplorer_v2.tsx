@@ -14,16 +14,7 @@ import {
 } from '@dnd-kit/sortable';
 
 import FileFolderDialog from "./components/fileFolderModal";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-
-
+import PathBreadcrumbs from "./components/breadcrumbs";
 
 const FileDraggableCard: React.FC<{
     file: FileMetaData;
@@ -62,6 +53,8 @@ const generateRandomId = () => {
     return "gid_"+Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
+
+
 export default function FileExplorer() {
       const searchParams = useSearchParams();
       const folder = searchParams.get('folder') || '';
@@ -69,8 +62,10 @@ export default function FileExplorer() {
         const [loading, setLoading] = useState<boolean>(false);
         const [size, setSize] = useState<number>(0);
         const [activeId, setActiveId] = useState<string | null>(null);
-        
-      useEffect(() => {
+        const parts = folder.split("/").filter(Boolean);
+
+
+        useEffect(() => {
         async function loadFiles() {
                   try {
                     setLoading(true);
@@ -140,6 +135,9 @@ export default function FileExplorer() {
 
       return (
         <>
+        <div className="flex mx-auto p-4  justify-between ">
+          <PathBreadcrumbs parts={parts} />
+        </div>
         <FileFolderDialog folder={folder} />
         <DndContext
       sensors={sensors}
