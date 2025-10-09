@@ -31,6 +31,7 @@ type Configuration struct {
 	BaseDir            string               `yaml:"base_dir"`
 	BackendConfig      HostingConfiguration `yaml:"backend_config"`
 	FrontEndConfig     HostingConfiguration `yaml:"frontend_config"`
+	ServerSalt         string               `yaml:"server_salt"`
 }
 
 var Config *Configuration
@@ -104,6 +105,13 @@ func LoadConfig(filePath string) error {
 	}
 	if Config.MasterPinUploads && Config.MasterPin == "" {
 		return errors.New("masterPin is required when MasterPinUploads is true")
+	}
+	if Config.ServerSalt == "" {
+		salt, err := createOrLoadServerSalt()
+		if err != nil {
+			return err
+		}
+		Config.ServerSalt = salt
 	}
 	return nil
 }
