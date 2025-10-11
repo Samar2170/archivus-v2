@@ -41,6 +41,10 @@ func GetServer(testEnv bool) *http.Server {
 	mux.HandleFunc("/files/move/", MoveFileHandler).Methods("POST")
 	mux.HandleFunc("/files/delete/", DeleteFileHandler).Methods("POST")
 
+	mux.HandleFunc("/bigupload/initiate/", InitiateBigUpload).Methods("POST")
+	mux.HandleFunc("/bigupload/chunk/", UploadChunk).Methods("POST")
+	mux.HandleFunc("/bigupload/finalize/", FinalizeBigUpload).Methods("POST")
+
 	logMiddleware := logging.NewLogMiddleware(&logger)
 	mux.Use(logMiddleware.Func())
 	wrappedMux := middleware.AuthMiddleware(mux)
