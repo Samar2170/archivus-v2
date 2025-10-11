@@ -32,3 +32,6 @@ uploads/**
 
 
 *.json
+
+
+.server_salt.txt

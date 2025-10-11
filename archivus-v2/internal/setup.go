@@ -5,6 +5,7 @@ import (
 	"archivus-v2/internal/auth"
 	"archivus-v2/internal/db"
 	"archivus-v2/internal/models"
+	"archivus-v2/internal/service/biguploads"
 	"os"
 )
 
@@ -26,7 +27,7 @@ func Setup(testEnv bool) {
 func SetupRun(testEnv bool) {
 	Setup(testEnv)
 	errors := []error{}
-	errors = append(errors, auth.CheckMasterUser())
+	errors = append(errors, auth.CheckMasterUser(), biguploads.EnsureBigUploadDirs())
 	for _, err := range errors {
 		if err != nil {
 			panic(err)
