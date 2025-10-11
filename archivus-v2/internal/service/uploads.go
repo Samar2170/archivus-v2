@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func saveFileMetaData(tags, filename, pathFromUploadsDir string, userID uuid.UUID, fileSize float64) error {
+func SaveFileMetaData(tags, filename, pathFromUploadsDir string, userID uuid.UUID, fileSize float64) error {
 	tx := db.StorageDB.Begin()
 	tagsArray, err := GetTags(tags, tx)
 	if err != nil {
@@ -61,7 +61,7 @@ func SaveFile(file multipart.File, fileHeader *multipart.FileHeader, username, f
 	if err != nil {
 		return utils.HandleError("SaveFile", "Failed to copy file content", err)
 	}
-	err = saveFileMetaData(tags, fileHeader.Filename, pathFromUploadsDir, user.ID, float64(fileHeader.Size))
+	err = SaveFileMetaData(tags, fileHeader.Filename, pathFromUploadsDir, user.ID, float64(fileHeader.Size))
 	if err != nil {
 		logging.Errorlogger.Println("Failed to save file metadata:", err)
 	}

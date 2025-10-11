@@ -6,9 +6,12 @@ import (
 	"archivus-v2/internal/dirmanager"
 	"archivus-v2/internal/models"
 	"archivus-v2/internal/utils"
+	"archivus-v2/pkg/logging"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func CreateUser(username, password, pin, email string, createDir, isMaster bool) (string, string, error) {
@@ -100,4 +103,63 @@ func ToggleUserSettingsByMaster(user models.User, userDirLock, writeAccess bool)
 	}
 	err = tx.Commit().Error
 	return err
+}
+
+type Credential struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	PIN      string `json:"pin"`
+	ApiKey   string `json:"api_key"`
+}
+
+func CreateUserByMasterPerm(userFolder string) (Credential, error) {
+	var cd Credential
+	cd.Username = userFolder
+	apiKey, err := utils.GenerateAPIKey(config.ApiKeyLength)
+	if err != nil {
+		logging.Errorlogger.Error().Msgf("Error generating API key: %v", err)
+		fmt.Printf("Error generating %s API key: %s", userFolder, err)
+		return cd, err
+	}
+	cd.ApiKey = apiKey
+	password, err := utils.GenerateAPIKey(config.PasswordMinLength)
+	if err != nil {
+		logging.Errorlogger.Error().Msgf("Error generating password: %v", err)
+		fmt.Printf("Error generating %s password: %s", userFolder, err)
+		return cd, err
+	}
+	cd.Password = password
+	pin, err := utils.GenerateRandomNumber(config.PinLelength)
+	if err != nil {
+		logging.Errorlogger.Error().Msgf("Error generating PIN: %v", err)
+		fmt.Printf("Error generating %s PIN: %s", userFolder, err)
+		return cd, err
+	}
+	cd.PIN = pin
+	tx := db.StorageDB.Begin()
+	var existingUser models.User
+	err = db.StorageDB.Where("username = ?", userFolder).First(&existingUser).Error
+	if err != gorm.ErrRecordNotFound {
+		tx.Rollback()
+		logging.Errorlogger.Error().Msgf("Error creating user for %s: %v", userFolder, err)
+		fmt.Printf("Error searching for existing user for %s: %s\n", userFolder, err)
+		return cd, err
+	}
+	tx.Create(&models.User{
+		ID:       uuid.New(),
+		Username: userFolder,
+		Email:    userFolder + "@placeholder.com",
+		PIN:      utils.HashString(pin),
+		Password: utils.HashString(password),
+		APIKey:   apiKey,
+	})
+	err = tx.Commit().Error
+	if err != nil {
+		logging.Errorlogger.Error().Msgf("Error creating user for %s: %v", userFolder, err)
+		fmt.Printf("Error creating user for %s: %s\n", userFolder, err)
+		return cd, err
+	} else {
+		fmt.Printf("User created for %s with API key: %s\n", userFolder, apiKey)
+		return cd, err
+	}
 }
