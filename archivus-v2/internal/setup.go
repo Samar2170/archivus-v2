@@ -21,6 +21,11 @@ func Setup(testEnv bool) {
 		&models.Directory{},
 	)
 
+	db.StorageDB.AutoMigrate(
+		&models.SyncState{},
+		&models.DirQueue{},
+	)
+
 	checkArchivusDirs()
 }
 

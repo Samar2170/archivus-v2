@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archivus-v2/internal/syncer"
 	"archivus-v2/server"
 	"archivus-v2/shell"
 	"fmt"
@@ -19,6 +20,7 @@ func main() {
 		Required: false,
 		Help:     "Mode: 'archive' or 'extract'",
 	})
+	syncCmd := parser.NewCommand("sync", "Sync files")
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Println(parser.Usage(err))
@@ -35,6 +37,13 @@ func main() {
 		fmt.Println("Adding new feature...")
 	case toggleUserSettingsCmd.Happened():
 		shell.ToggleUserSettings()
+	case syncCmd.Happened():
+		fmt.Println("Syncing files...")
+		syncer.CleanupDirQueue()
+		errs := syncer.Sync()
+		for _, err := range errs {
+			fmt.Println(err)
+		}
 	default:
 		fmt.Println("No command provided. Use -h for help.")
 	}
