@@ -38,6 +38,25 @@ func markDirScanned(path string) error {
 	return err
 }
 
+func ensureQueueHasRootSubDirs(root string) error {
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			if shouldScanDir(entry.Name()) {
+				path := filepath.Join(root, entry.Name())
+				q := models.DirQueue{
+					Path: path,
+				}
+				db.StorageDB.Where("path = ?", path).FirstOrCreate(&q)
+			}
+		}
+	}
+	return nil
+}
+
 func addSubDirsToQueue(parent string) error {
 	entries, err := os.ReadDir(parent)
 	if err != nil {
@@ -52,6 +71,27 @@ func addSubDirsToQueue(parent string) error {
 				db.StorageDB.Create(&q)
 			}
 		}
+	}
+	return nil
+}
+
+func getSyncState() (time.Time, error) {
+	var state models.SyncState
+	err := db.StorageDB.Where("id = ?", 1).First(&state).Error
+	if err != nil {
+		return time.Time{}, err
+	}
+	return state.LastSyncedAt, nil
+}
+
+func setSyncState() error {
+	t := time.Now()
+	syncState := models.SyncState{
+		LastSyncedAt: t,
+	}
+	err := db.StorageDB.Where("id = ?", 1).FirstOrCreate(&syncState).Error
+	if err != nil {
+		return err
 	}
 	return nil
 }
