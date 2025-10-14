@@ -21,6 +21,7 @@ func main() {
 		Help:     "Mode: 'archive' or 'extract'",
 	})
 	syncCmd := parser.NewCommand("sync", "Sync files")
+	cleanupSyncDirCmd := parser.NewCommand("cleanup-sync-queue", "Cleanup sync directory")
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Println(parser.Usage(err))
@@ -39,11 +40,13 @@ func main() {
 		shell.ToggleUserSettings()
 	case syncCmd.Happened():
 		fmt.Println("Syncing files...")
-		syncer.CleanupDirQueue()
 		errs := syncer.Sync()
 		for _, err := range errs {
 			fmt.Println(err)
 		}
+	case cleanupSyncDirCmd.Happened():
+		fmt.Println("Cleaning up sync directory...")
+		syncer.CleanupDirQueue()
 	default:
 		fmt.Println("No command provided. Use -h for help.")
 	}

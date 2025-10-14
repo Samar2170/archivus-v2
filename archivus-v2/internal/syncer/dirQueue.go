@@ -45,10 +45,12 @@ func addSubDirsToQueue(parent string) error {
 	}
 	for _, entry := range entries {
 		if entry.IsDir() {
-			q := models.DirQueue{
-				Path: filepath.Join(parent, entry.Name()),
+			if shouldScanDir(entry.Name()) {
+				q := models.DirQueue{
+					Path: filepath.Join(parent, entry.Name()),
+				}
+				db.StorageDB.Create(&q)
 			}
-			db.StorageDB.Create(&q)
 		}
 	}
 	return nil

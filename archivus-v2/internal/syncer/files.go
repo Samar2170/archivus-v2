@@ -31,39 +31,19 @@ func saveFileMetadata(path string, info os.FileInfo) error {
 	return nil
 }
 
-func syncFilesForDir(dir string) error {
+func syncFilesForDir(dir string) (float64, error) {
 	count := 0
-	// TODO: handle files only flat
-	// err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	info, err := d.Info()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if !shouldScanDir(info.Name()) {
-	// 		return filepath.SkipDir
-	// 	}
-	// 	count++
-	// 	if count%500 == 0 {
-	// 		logging.AuditLogger.Printf("Synced %d files", count)
-	// 	}
-	// 	if info.IsDir() {
-	// 		return nil
-	// 	} else {
-	// 		return saveFileMetadata(path, info)
-	// 	}
-	// })
+	var size float64 = 0
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		return err
+		return size, err
 	}
 	for _, f := range files {
 		info, err := f.Info()
 		if err != nil {
-			return err
+			return size, err
 		}
+		size += float64(info.Size())
 		if !shouldScanDir(info.Name()) {
 			continue
 		}
@@ -76,11 +56,11 @@ func syncFilesForDir(dir string) error {
 		} else {
 			err := saveFileMetadata(filepath.Join(dir, f.Name()), info)
 			if err != nil {
-				return err
+				return size, err
 			}
 		}
 	}
-	return err
+	return size, err
 }
 
 func getSyncState() (time.Time, error) {
@@ -122,6 +102,12 @@ func ensureQueueHasRootSubDirs(root string) error {
 	return nil
 }
 
+func createDirEntry(dir *models.Directory) {
+	pathSplit := strings.Split(dir.Path, "/")
+	dir.Name = pathSplit[len(pathSplit)-1]
+	db.StorageDB.Create(&dir)
+}
+
 func startSync(stop <-chan struct{}) error {
 	var err error
 	err = ensureQueueHasRoot(config.Config.BaseDir)
@@ -137,34 +123,51 @@ func startSync(stop <-chan struct{}) error {
 		case <-stop:
 			return nil
 		default:
-			for {
-				dir, _ := nextDir()
-				isShouldScanDir := shouldScanDir(dir)
-				if !isShouldScanDir {
-					continue
-				}
-				if err := syncFilesForDir(dir); err != nil {
-					return err
-				}
-				if err := markDirScanned(dir); err != nil {
-					return err
-				}
-				if err := addSubDirsToQueue(dir); err != nil {
-					return err
-				}
+			dir, _ := nextDir()
+			isShouldScanDir := shouldScanDir(dir)
+			if !isShouldScanDir {
+				continue
+			}
+			dirEntry := models.Directory{
+				Path: dir,
 			}
 
+			size, err := syncFilesForDir(dir)
+			if err != nil {
+				dirEntry.LastError = err.Error()
+				createDirEntry(&dirEntry)
+				return err
+			}
+			dirEntry.SizeInMb = size / 1024 / 1024
+
+			if err := markDirScanned(dir); err != nil {
+				dirEntry.LastError = err.Error()
+				createDirEntry(&dirEntry)
+				return err
+			}
+			if err := addSubDirsToQueue(dir); err != nil {
+				dirEntry.LastError = err.Error()
+				createDirEntry(&dirEntry)
+				return err
+			}
+			createDirEntry(&dirEntry)
+			select {
+			case <-stop:
+				return nil
+			default:
+			}
 		}
 	}
 }
 
 var skipDirsList = map[string]bool{
-	"venv": true,
-	".git": true,
+	"venv":        true,
+	".git":        true,
+	"__pycache__": true,
 }
 
 func shouldScanDir(dir string) bool {
-	if dir == "" || dir[0] == '.' {
+	if dir == "" || dir[0] == '.' || dir[0] == '_' {
 		return false
 	}
 	dirNameSplit := strings.Split(dir, "/")
