@@ -1,6 +1,6 @@
 import { apiFetch } from "../utils/fetcher";
 
-const BASE_URL = "http://localhost:8000/"; // adjust to match your backend
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL; // adjust to match your backend
 
 export interface SigninResponse {
   token: string;

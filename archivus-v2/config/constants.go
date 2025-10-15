@@ -4,7 +4,8 @@ import "path/filepath"
 
 const (
 	TestDbFile        = "test.db"
-	ConfigFile        = "config.yaml"
+	ProdConfigFile    = "config.prod.yaml"
+	DevConfigFile     = "config.dev.yaml"
 	UserId            = "userId"
 	Username          = "username"
 	ApiKeyLength      = 32
@@ -13,6 +14,8 @@ const (
 	CredsFile         = "creds.json"
 	DefaultUserDir    = "users"
 	UserInfoFileName  = ".userinfo.json"
+
+	ArchivusV2Dir = "archivus-v2"
 
 	sessionsDir = ".sessions"
 	TmpSuffix   = ".tmp"

@@ -146,7 +146,7 @@ export default function FileExplorer() {
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={Array.from(files!.values())} strategy={verticalListSortingStrategy}>
-        <ul role="list" className="grid grid-cols-6 gap-6 sm:grid-cols-4 lg:grid-cols-7">
+        <ul role="list" className="grid md:grid-cols-6 lg:gap-6 gap-2 grid-cols-2 lg:grid-cols-7">
           {Array.from(files!.values()).map((file) => (
             <FileDraggableCard key={file.id} file={file} onClick={handleClick} />
           ))}

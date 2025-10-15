@@ -22,6 +22,7 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetServer(testEnv bool) *http.Server {
+	SetupCors()
 	internal.SetupRun(testEnv)
 
 	logger := logging.AuditLogger

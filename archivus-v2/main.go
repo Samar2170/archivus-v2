@@ -1,7 +1,9 @@
 package main
 
 import (
+	"archivus-v2/config"
 	"archivus-v2/internal/syncer"
+	"archivus-v2/pkg/logging"
 	"archivus-v2/server"
 	"archivus-v2/shell"
 	"fmt"
@@ -16,10 +18,12 @@ func main() {
 	newUserCmd := parser.NewCommand("new-user", "Create a new master user")
 	featureCmd := parser.NewCommand("feature", "Add a new feature")
 	toggleUserSettingsCmd := parser.NewCommand("user-settings", "Toggle user settings")
+
 	m := parser.String("m", "mode", &argparse.Options{
 		Required: false,
 		Help:     "Mode: 'archive' or 'extract'",
 	})
+
 	syncCmd := parser.NewCommand("sync", "Sync files")
 	cleanupSyncDirCmd := parser.NewCommand("cleanup-sync-queue", "Cleanup sync directory")
 	err := parser.Parse(os.Args)
@@ -27,6 +31,10 @@ func main() {
 		fmt.Println(parser.Usage(err))
 		return
 	}
+
+	config.SetupConfig(*m)
+	logging.SetupLogging()
+
 	switch {
 	case serverCmd.Happened():
 		fmt.Println("Starting server...")

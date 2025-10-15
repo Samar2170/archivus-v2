@@ -46,20 +46,31 @@ const (
 	CompressionQuality = 85
 )
 
-func init() {
+func SetupConfig(mode string) {
 	var err error
-	// currentFile, err := os.Executable()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// ProjectBaseDir = filepath.Dir(currentFile)
-	ProjectBaseDir = "."
-	// err = LoadConfig(filepath.Join(ProjectBaseDir, "config.yaml"))
-	defaultConfigPaths := []string{
-		ConfigFile,
-		"../" + ConfigFile,
-		filepath.Join(ProjectBaseDir, ConfigFile),
+	var defaultConfigPaths []string
+
+	if mode == "prod" {
+		currentFile, err := os.Executable()
+		if err != nil {
+			panic(err)
+		}
+		ProjectBaseDir = filepath.Dir(currentFile)
+
+		defaultConfigPaths = []string{
+			ProdConfigFile,
+			"../" + ProdConfigFile,
+			filepath.Join(ProjectBaseDir, ProdConfigFile),
+		}
+	} else {
+		ProjectBaseDir = "."
+		defaultConfigPaths = []string{
+			DevConfigFile,
+			"../" + DevConfigFile,
+			filepath.Join(ProjectBaseDir, DevConfigFile),
+		}
 	}
+
 	for _, path := range defaultConfigPaths {
 		err = LoadConfig(path)
 		if err == nil {
@@ -94,7 +105,7 @@ func LoadConfig(filePath string) error {
 		Config.LogsDir = "logs"
 	}
 	if Config.StorageDbFile == "" {
-		Config.StorageDbFile = filepath.Join(ProjectBaseDir, "storage.db")
+		Config.StorageDbFile = "storage.db"
 	}
 	if Config.BaseDir == "" {
 		if homeDirErr != nil {
@@ -128,7 +139,6 @@ func CheckConfig() {
 	}
 	if Config.BackendConfig.BaseUrl == "" ||
 		Config.BackendConfig.Port == "" ||
-		Config.FrontEndConfig.BaseUrl == "" ||
 		Config.FrontEndConfig.Port == "" {
 		panic("Backend or Frontend configuration is incomplete")
 	}

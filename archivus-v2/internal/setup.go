@@ -7,9 +7,12 @@ import (
 	"archivus-v2/internal/models"
 	"archivus-v2/internal/service/biguploads"
 	"os"
+	"path/filepath"
 )
 
 func Setup(testEnv bool) {
+	checkArchivusDirs()
+
 	if !testEnv {
 		db.InitDB()
 	}
@@ -26,7 +29,6 @@ func Setup(testEnv bool) {
 		&models.DirQueue{},
 	)
 
-	checkArchivusDirs()
 }
 
 func SetupRun(testEnv bool) {
@@ -41,7 +43,13 @@ func SetupRun(testEnv bool) {
 }
 
 func checkArchivusDirs() {
+	if config.Config.Mode == "prod" {
+		if _, err := os.Stat(filepath.Join(config.Config.BaseDir, config.ArchivusV2Dir)); err != nil {
+			os.Mkdir(filepath.Join(config.Config.BaseDir, config.ArchivusV2Dir), os.ModePerm)
+		}
+	}
 	if _, err := os.Stat(config.Config.LogsDir); err != nil {
 		os.Mkdir(config.Config.LogsDir, os.ModePerm)
 	}
+
 }

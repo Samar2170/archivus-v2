@@ -11,7 +11,7 @@ import (
 var Errorlogger zerolog.Logger
 var AuditLogger zerolog.Logger
 
-func init() {
+func SetupLogging() {
 	auditLogFilePath := filepath.Join(config.Config.LogsDir, "audit.log")
 	errorLogFilePath := filepath.Join(config.Config.LogsDir, "error.log")
 	auditLogFile := &lumberjack.Logger{

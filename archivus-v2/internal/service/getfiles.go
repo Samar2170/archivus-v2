@@ -74,7 +74,7 @@ func getFileMetadatas(files *[]os.DirEntry, pathFromUploadsDir string) (map[stri
 		paths = append(paths, filepath.Join(pathFromUploadsDir, file.Name()))
 	}
 	var fmds []models.FileMetadata
-	err := db.StorageDB.Model(&models.FileMetadata{}).Where("file_path IN ?", paths).Find(&fmds).Error
+	err := db.StorageDB.Model(&models.FileMetadata{}).Where("rel_path IN ?", paths).Find(&fmds).Error
 	if err != nil {
 		logging.Errorlogger.Error().Msgf("Failed to get file metadata for paths: %v, error: %v", paths, err)
 		return fmdMap, err
