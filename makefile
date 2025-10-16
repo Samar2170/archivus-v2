@@ -1,7 +1,5 @@
 .PHONY: prepare server backend dev
 
-
-
 prepare:
 # 	mkdir -p bin
 # 	mkdir -p bin/server
