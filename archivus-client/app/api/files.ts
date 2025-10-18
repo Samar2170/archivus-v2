@@ -1,8 +1,9 @@
 import { get } from "http";
 import { apiFetch } from "../utils/fetcher";
+import { baseUrl } from "../data/constants";
 
 
-const BASE_URL = "http://localhost:8000/"; // adjust to match your backend
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL; // adjust to match your backend
 
 
 export interface FileMetaData {
@@ -38,7 +39,8 @@ export interface filesListResponse {
 }
 
 export function getFilesByFolder(folder: string) {
-    return apiFetch<getFilesByFolderResponse>(`${BASE_URL}files/get/?folder=${folder}`, {
+ 
+    return apiFetch<getFilesByFolderResponse>(`${baseUrl}files/get/?folder=${folder}`, {
         method: "GET",
     });
 }

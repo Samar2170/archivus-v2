@@ -18,7 +18,7 @@ export default function FileCard({ file }:{file:FileMetaData}) {
   
   {isDir ? (
     // <Link href={`/?folder=${file.Path}`} className="flex flex-col items-center">
-      <Folder className="w-30 h-30 text-blue-500" />
+      <Folder className="w-20 h-20 text-blue-500" />
     // </Link> 
   ) : file.SignedUrl && file.Extension.match(/(png|jpg|jpeg|gif)$/i) ? (
     <Link href={file.SignedUrl} className="flex flex-col items-center">
@@ -27,7 +27,7 @@ export default function FileCard({ file }:{file:FileMetaData}) {
         alt={file.Name}
         width={80}
         height={80}
-        className="object-cover w-30 h-30"
+        className="object-cover w-20 h-20"
       />
     </Link>
   ) : (
