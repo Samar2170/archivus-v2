@@ -1,23 +1,14 @@
-.PHONY: prepare server backend dev
-
-
+.PHONY: prepare backend frontend build dev
 
 prepare:
 # 	mkdir -p bin
 # 	mkdir -p bin/server
 
-server:
-	@echo "Starting server..."
-	cd archivus-v2 && go build . 
-	cd archivus-v2 && ./archivus-v2 server &
-	cd archivus-client && npm run build &
-	cd archivus-client && npm run start &
-	wait
-
 backend:
 	@echo "Starting server..."
 	cd archivus-v2 && go build . 
 	cd archivus-v2 && ./archivus-v2 server
+# 	integrate flag
 
 frontend:
 	@echo "Starting client..."
@@ -29,4 +20,14 @@ dev:
 	cd archivus-client && npm run dev &
 	wait
 	
+build:
+	@echo "Building Project..."
+	
+
+	cd archivus-v2 && go build -o ../dist/bin/linux_amd64/ .
+	cp archivus-v2/config.prod.yaml dist/bin/linux_amd64/config.prod.yaml
+
+	cd archivus-client && npm run build
+	cp -r archivus-client/.next dist/frontend/.next && cp archivus-client/package.json dist/frontend/  
+
 
