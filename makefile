@@ -27,6 +27,8 @@ build:
 	cd archivus-v2 && go build -o ../dist/bin/linux_amd64/ .
 	cp archivus-v2/config.prod.yaml dist/bin/linux_amd64/config.prod.yaml
 
+	rm -rf dist/frontend
+	mkdir -p dist/frontend
 	cd archivus-client && npm run build
 	cp -r archivus-client/.next dist/frontend/.next && cp archivus-client/package.json dist/frontend/  
 
