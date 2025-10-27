@@ -29,6 +29,11 @@ func Setup(testEnv bool) {
 		&models.DirQueue{},
 	)
 
+	db.StorageDB.AutoMigrate(
+		&models.Project{},
+		&models.Todo{},
+	)
+
 }
 
 func SetupRun(testEnv bool) {
