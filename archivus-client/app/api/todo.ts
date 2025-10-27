@@ -37,7 +37,7 @@ export function createProject(title: string, description: string) {
 }
 
 export function getTodos(projectId?: number) {
-    var url = `${baseUrl}tempora/todos`;
+    let url = `${baseUrl}tempora/todos`;
     if (projectId) {
         url += `?projectId=${projectId}`;
     }

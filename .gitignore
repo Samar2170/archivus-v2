@@ -1,9 +1,11 @@
 archivus.service
 
-bin/*
+**/bin/**
 
 **/.next/**
 
 **/config.*.yaml
 
 dist/frontend/*
+
+dist/bin/*

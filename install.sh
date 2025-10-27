@@ -15,12 +15,12 @@ BIN_DIR="$INSTALL_DIR/bin"
 SERVICE_DIR="/etc/systemd/system"
 LAUNCHD_DIR="$HOME/Library/LaunchAgents"
 
-sudo rm "$BIN_DIR/$PROJECT_NAME"
-sudo rm -rf "$INSTALL_DIR/frontend"
+rm -rf "$BIN_DIR/$PROJECT_NAME"
+rm -rf "$INSTALL_DIR/frontend"
 
-sudo mkdir -p "$INSTALL_DIR"
-sudo mkdir -p "$INSTALL_DIR/frontend"
-sudo mkdir -p "$BIN_DIR"
+mkdir -p "$INSTALL_DIR"
+mkdir -p "$INSTALL_DIR/frontend"
+mkdir -p "$BIN_DIR"
 
 echo "Installing $PROJECT_NAME..."
 

@@ -110,7 +110,7 @@ export default function TodoDialog({projects}:{projects:Project[]}) {
                       <input type="text" multiple value={newTodo} onChange={(e) => setNewTodo(e.target.value)}  className="border rounded p-2" />
                       <select value={selectedProject} onChange={(e) => setSelectedProject(Number(e.target.value))}>
                         <option value="">Select Project</option>
-                        {projects.map((p) => (
+                        {projects && projects.map((p) => (
                           <option key={p.id} value={p.id}>{p.title}</option>
                         ))}
                       </select>

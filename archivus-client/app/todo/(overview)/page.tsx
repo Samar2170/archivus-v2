@@ -67,7 +67,7 @@ export default function Page() {
           <h2 className="text-lg sm:text-xl font-semibold text-gray-700 mb-4">
             Projects
           </h2>
-          {projects.length === 0 ? (
+          {projects && projects.length === 0 ? (
             <p className="text-gray-500">No projects yet.</p>
           ) : (
             <ProjectTable projects={projects} onChange={handleProjectChange}/>
