@@ -17,6 +17,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	UserIdKey = "userId"
+)
+
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	response.SuccessResponse(w, "OK")
 }
@@ -45,6 +49,11 @@ func GetServer(testEnv bool) *http.Server {
 	mux.HandleFunc("/bigupload/initiate/", InitiateBigUpload).Methods("POST")
 	mux.HandleFunc("/bigupload/chunk/", UploadChunk).Methods("POST")
 	mux.HandleFunc("/bigupload/finalize/", FinalizeBigUpload).Methods("POST")
+
+	subRoute := mux.PathPrefix("/tempora").Subrouter()
+	subRoute.HandleFunc("/todos", Todos).Methods("POST", "GET")
+	subRoute.HandleFunc("/todos/update", UpdateTodos).Methods("POST", "DELETE")
+	subRoute.HandleFunc("/projects", Projects).Methods("POST", "GET", "DELETE")
 
 	logMiddleware := logging.NewLogMiddleware(&logger)
 	mux.Use(logMiddleware.Func())

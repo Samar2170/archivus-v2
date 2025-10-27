@@ -15,6 +15,9 @@ func SetupCors() {
 	for i := 1; i < 255; i++ {
 		allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://192.168.1.%d:%s", i, config.Config.FrontEndConfig.Port))
 	}
+	for i := 1; i < 10; i++ {
+		allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://localhost:%d", 3000+i))
+	}
 	allowedOrigins = append(allowedOrigins, "http://localhost:3000")
 	allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://%s:%s", config.Config.FrontEndConfig.BaseUrl, config.Config.FrontEndConfig.Port))
 	allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://%s:%s/", config.Config.FrontEndConfig.BaseUrl, config.Config.FrontEndConfig.Port))

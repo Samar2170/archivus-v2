@@ -15,6 +15,7 @@ const user = {
 const navigation = [
   {name: 'Home', href: '/', icon: HomeIcon, current: false },
   { name: 'List Files', href: '/list', icon: ListBulletIcon, current: false },
+  {name: 'ToDo', href: '/todo', icon: ListBulletIcon, current: false },
 ]
 const userNavigation = [
   { name: 'Your profile', href: '#' },
@@ -207,11 +208,6 @@ export default function NavbarLayout({children}: {children: React.ReactNode}) {
               </div>
             </DisclosurePanel>
           </Disclosure>
-          <header className="py-10">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
-            </div>
-          </header>
         </div>
 
         <main className="-mt-32">
