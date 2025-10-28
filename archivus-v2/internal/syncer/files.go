@@ -5,14 +5,19 @@ import (
 	"archivus-v2/internal/db"
 	"archivus-v2/internal/models"
 	"archivus-v2/pkg/logging"
+	"errors"
 	"os"
 	"path/filepath"
 )
 
 var skipDirsList = map[string]bool{
-	"venv":        true,
-	".git":        true,
-	"__pycache__": true,
+	"venv":         true,
+	".git":         true,
+	"__pycache__":  true,
+	"snap":         true,
+	"node_modules": true,
+	"bin":          true,
+	"build":        true,
 }
 
 func saveFileMetadata(path string, info os.FileInfo) error {
@@ -67,9 +72,17 @@ func syncFilesForDir(dir string) (float64, error) {
 	return size, err
 }
 
+func formatErrors(errs []error) string {
+	var errStr string
+	for _, err := range errs {
+		errStr += err.Error() + "\n"
+	}
+	return errStr
+}
+
 func startSync(stop <-chan struct{}) error {
-	var err error
-	err = ensureQueueHasRoot(config.Config.BaseDir)
+	var errs []error
+	err := ensureQueueHasRoot(config.Config.BaseDir)
 	if err != nil {
 		return err
 	}
@@ -95,25 +108,26 @@ func startSync(stop <-chan struct{}) error {
 			if err != nil {
 				dirEntry.LastError = err.Error()
 				createDirEntry(&dirEntry)
-				return err
+				errs = append(errs, err)
+			} else {
+				dirEntry.SizeInMb = size / 1024 / 1024
 			}
-			dirEntry.SizeInMb = size / 1024 / 1024
-
 			if err := markDirScanned(dir); err != nil {
 				dirEntry.LastError = err.Error()
 				createDirEntry(&dirEntry)
-				return err
+				errs = append(errs, err)
 			}
 			if err := addSubDirsToQueue(dir); err != nil {
 				dirEntry.LastError = err.Error()
 				createDirEntry(&dirEntry)
-				return err
+				errs = append(errs, err)
 			}
 			createDirEntry(&dirEntry)
 			select {
 			case <-stop:
-				return nil
+				return errors.New(formatErrors(errs))
 			default:
+				return errors.New(formatErrors(errs))
 			}
 		}
 	}

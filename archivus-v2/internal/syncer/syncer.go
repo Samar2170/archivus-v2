@@ -4,24 +4,36 @@ import (
 	"archivus-v2/internal"
 	"archivus-v2/internal/db"
 	"archivus-v2/pkg/logging"
+	"context"
 	"errors"
 	"time"
 )
 
-func runSync() error {
-	var err error
+func runSync(ctx context.Context) error {
 	stop := make(chan struct{})
-	go func() {
-		err = startSync(stop)
-	}()
-	time.Sleep(30 * time.Second)
-	close(stop)
+	errCh := make(chan error, 1)
+	// go func() {
+	errCh <- startSync(stop)
+	// }()
+	select {
+	case <-ctx.Done():
+		close(stop)
+		<-errCh
+		return ctx.Err()
+	case <-time.After(300 * time.Second):
+		close(stop)
+		err := <-errCh
+		_ = setSyncState()
+		return err
+	}
+	// time.Sleep(300 * time.Second)
+	// close(stop)
 
-	err = setSyncState()
-	return err
+	// err = setSyncState()
+	// return err
 }
 
-func Sync() []error {
+func Sync(ctx context.Context) []error {
 	internal.Setup(false)
 	var errs []error
 	if db.StorageDB == nil {
@@ -29,10 +41,10 @@ func Sync() []error {
 		errs = append(errs, errors.New("storage DB is nil"))
 		return errs
 	}
-	userErrs := SyncUsers()
-	errs = append(errs, userErrs...)
+	// userErrs := SyncUsers()
+	// errs = append(errs, userErrs...)
 
-	fileErr := runSync()
+	fileErr := runSync(ctx)
 	errs = append(errs, fileErr)
 	return errs
 }
