@@ -10,9 +10,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -67,9 +64,7 @@ func GetServer(testEnv bool) *http.Server {
 	return server
 }
 
-func RunServer() {
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
+func RunServer(ctx context.Context) {
 	server := GetServer(false)
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -77,11 +72,9 @@ func RunServer() {
 		}
 	}()
 	fmt.Printf("Server is running at %s\n", config.GetBackendAddr())
-	<-stop
 
+	<-ctx.Done()
 	log.Println("Shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
