@@ -8,6 +8,10 @@ import (
 
 type SyncState struct {
 	*gorm.Model
+	FilesSynced  int64
+	TotalFileMds int64
+	TotalDirs    int64
+
 	LastSyncedAt time.Time
 }
 
