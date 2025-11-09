@@ -9,3 +9,9 @@ archivus.service
 dist/frontend/*
 
 dist/bin/*
+
+
+notes.md
+
+
+.vscode

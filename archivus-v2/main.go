@@ -3,6 +3,7 @@ package main
 import (
 	"archivus-v2/config"
 	"archivus-v2/internal/syncer"
+	"archivus-v2/internal/synkr"
 	"archivus-v2/pkg/logging"
 	"archivus-v2/server"
 	"archivus-v2/shell"
@@ -11,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 
 	"github.com/akamensky/argparse"
 )
@@ -63,23 +65,19 @@ func main() {
 	fmt.Println("Mode:", *m)
 }
 func runSync() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	errs := syncer.Sync(ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel() // cancels on exit (or when timeout hits)
 
-	for _, err := range errs {
-		fmt.Println(err)
-	}
+	fmt.Println("Syncing files... (will stop after 1 minute)")
 
-	if len(errs) == 0 {
+	err := synkr.StartSync(ctx, 1)
+	if err != nil && err != context.DeadlineExceeded && err != context.Canceled {
+		fmt.Printf("Sync failed: %v\n", err)
+	} else if err == context.DeadlineExceeded {
+		fmt.Println("Sync timed out after 1 minute")
+	} else {
 		fmt.Println("Files synced successfully!")
 	}
-
-	fmt.Println("Syncing files...")
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	<-c
-
 }
 
 func run() {

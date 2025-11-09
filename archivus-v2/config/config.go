@@ -142,5 +142,4 @@ func CheckConfig() {
 		Config.FrontEndConfig.Port == "" {
 		panic("Backend or Frontend configuration is incomplete")
 	}
-
 }

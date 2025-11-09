@@ -12,6 +12,8 @@ type SyncState struct {
 	TotalFileMds int64
 	TotalDirs    int64
 
+	LastErr string
+
 	LastSyncedAt time.Time
 }
 

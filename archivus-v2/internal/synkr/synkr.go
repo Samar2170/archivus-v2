@@ -14,7 +14,7 @@ func StartSync(ctx context.Context, minutes int) error {
 	// count files and dirs before syncing
 	// count afterwards to get accurate file synced count
 	// if no files synced an external source of truth needed to make sure its working and not broken
-	_, err := getSyncState()
+	initialSyncState, err := getSyncState()
 	if err != nil {
 		return err
 	}
@@ -28,14 +28,14 @@ func StartSync(ctx context.Context, minutes int) error {
 
 	select {
 	case <-ctx.Done():
+		_ = setSyncState(filesSynced, initialSyncState.TotalFileMds, initialSyncState.TotalDirs)
 		close(stop)
 		<-errCh
-		_ = setSyncState(filesSynced)
 		return ctx.Err()
 	case <-time.After(time.Duration(minutes) * 60 * time.Second):
+		_ = setSyncState(filesSynced, initialSyncState.TotalFileMds, initialSyncState.TotalDirs)
 		close(stop)
 		err := <-errCh
-		_ = setSyncState(filesSynced)
 		return err
 	}
 }
@@ -84,7 +84,7 @@ func sync(stop <-chan struct{}) (int64, error) {
 			case <-stop:
 				return filesSynced, errors.New(formatErrors(errs))
 			default:
-				return filesSynced, errors.New(formatErrors(errs))
+				continue
 			}
 		}
 	}
