@@ -128,7 +128,7 @@ func getUserInput(prompt, defaultValue string) string {
 	return input
 }
 
-func runBigUploadInteractive(baseUrl, filepath string) {
+func runBigUploadInteractive(baseUrl, filepath string, debug bool) {
 	username := getUserInput("Enter username: ", "")
 	pin := getUserInput("Enter PIN: ", "")
 	if len(username) < 3 || len(pin) != 6 {
@@ -139,7 +139,7 @@ func runBigUploadInteractive(baseUrl, filepath string) {
 		Username: username,
 		Pin:      pin,
 	}
-	err := DoBigUpload(baseUrl, filepath, lr)
+	err := DoBigUpload(baseUrl, filepath, lr, debug)
 	if err != nil {
 		fmt.Println("Upload failed:", err)
 	} else {
@@ -228,7 +228,7 @@ func initializeUpload(client *http.Client, filepath, baseUrl string, headers map
 
 }
 
-func DoBigUpload(baseUrl, filepath string, lr LoginRequest) error {
+func DoBigUpload(baseUrl, filepath string, lr LoginRequest, debug bool) error {
 	client := &http.Client{}
 	headers := make(map[string]string)
 	token, err := login(client, baseUrl, lr)
@@ -239,6 +239,9 @@ func DoBigUpload(baseUrl, filepath string, lr LoginRequest) error {
 
 	initResp, totalSize, chunkSize, hashes, err := initializeUpload(client, filepath, baseUrl, headers)
 	if err != nil {
+		if debug {
+			fmt.Println("Initialization response error:", err)
+		}
 		return err
 	}
 	needednMap := make(map[int]bool)
@@ -271,6 +274,9 @@ func DoBigUpload(baseUrl, filepath string, lr LoginRequest) error {
 			if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
 				mu.Lock()
 				if firstErr == nil {
+					if debug {
+						fmt.Printf("Error reading chunk %d: %v\n", idx, err)
+					}
 					firstErr = err
 				}
 				mu.Unlock()
@@ -279,6 +285,9 @@ func DoBigUpload(baseUrl, filepath string, lr LoginRequest) error {
 			if err := uploadChunk(baseUrl, initResp.Wark, idx, buf, hashes[idx], headers); err != nil {
 				mu.Lock()
 				if firstErr == nil {
+					if debug {
+						fmt.Printf("Error uploading chunk %d: %v\n", idx, err)
+					}
 					firstErr = err
 				}
 				mu.Unlock()
@@ -289,13 +298,16 @@ func DoBigUpload(baseUrl, filepath string, lr LoginRequest) error {
 	}
 	wg.Wait()
 	if firstErr != nil {
+		if debug {
+			fmt.Println("Upload encountered errors:", firstErr)
+		}
 		return firstErr
 	}
-	err = finalizeUpload(client, baseUrl, headers, initResp)
+	err = finalizeUpload(client, baseUrl, headers, initResp, debug)
 	return err
 }
 
-func finalizeUpload(client *http.Client, baseUrl string, headers map[string]string, initResp initResponse) error {
+func finalizeUpload(client *http.Client, baseUrl string, headers map[string]string, initResp initResponse, debug bool) error {
 	finalReqBody := map[string]interface{}{
 		"wark": initResp.Wark,
 	}
@@ -306,14 +318,23 @@ func finalizeUpload(client *http.Client, baseUrl string, headers map[string]stri
 		bytes.NewReader(body),
 	)
 	if err != nil {
+		if debug {
+			fmt.Println("Error creating finalize request:", err)
+		}
 		return err
 	}
 	finalResp, err := MakeRequest(client, finalReq, headers)
 	if err != nil {
+		if debug {
+			fmt.Println("Error during finalize request:", err)
+		}
 		return err
 	}
 	var fResp map[string]interface{}
 	if err := json.NewDecoder(finalResp.Body).Decode(&fResp); err != nil {
+		if debug {
+			fmt.Println("Error decoding finalize response:", err)
+		}
 		return err
 	}
 	finalResp.Body.Close()
