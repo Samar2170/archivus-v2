@@ -9,3 +9,5 @@ archivus.service
 dist/frontend/*
 
 dist/bin/*
+
+archivus-go-client
