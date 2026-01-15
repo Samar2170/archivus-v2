@@ -1,9 +1,12 @@
 package logging
 
 import (
+	"archivus-v2/config"
 	"context"
 	"fmt"
+	"path/filepath"
 
+	"github.com/natefinch/lumberjack"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
@@ -27,10 +30,20 @@ func InitProvider(serviceName, serviceVersion string) (func(context.Context) err
 		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
 
+	traceLogFilePath := filepath.Join(config.Config.LogsDir, "traces.log")
+	traceLogFile := &lumberjack.Logger{
+		Filename:   traceLogFilePath,
+		MaxSize:    10,
+		MaxBackups: 3,
+		MaxAge:     28,
+		Compress:   false,
+	}
+
 	// Create stdout exporter to print traces to stdout.
 	// You might replace this with an OTLP exporter in production.
 	traceExporter, err := stdouttrace.New(
 		stdouttrace.WithPrettyPrint(),
+		stdouttrace.WithWriter(traceLogFile),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
