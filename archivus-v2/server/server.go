@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 const (
@@ -59,15 +60,27 @@ func GetServer(testEnv bool) *http.Server {
 	mux.Use(logMiddleware.Func())
 	wrappedMux := middleware.AuthMiddleware(mux)
 	wrappedMux = CorsConfig.Handler(wrappedMux)
+	otelHandler := otelhttp.NewHandler(wrappedMux, "server")
 
 	server := &http.Server{
-		Handler: wrappedMux,
+		Handler: otelHandler,
 		Addr:    config.GetBackendAddr(),
 	}
 	return server
 }
 
 func RunServer() {
+	// Initialize OpenTelemetry
+	shutdown, err := logging.InitProvider("archivus-v2", "1.0.0")
+	if err != nil {
+		log.Fatalf("Failed to init OpenTelemetry: %v", err)
+	}
+	defer func() {
+		if err := shutdown(context.Background()); err != nil {
+			log.Printf("Failed to shutdown OpenTelemetry: %v", err)
+		}
+	}()
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 	server := GetServer(false)
