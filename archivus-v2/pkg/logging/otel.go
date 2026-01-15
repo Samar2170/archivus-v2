@@ -1,0 +1,56 @@
+package logging
+
+import (
+	"context"
+	"fmt"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+)
+
+// InitProvider initializes the OpenTelemetry tracer provider.
+// It uses a stdout exporter for demonstration/local logging purposes.
+// Returns a shutdown function that should be called when the service terminates.
+func InitProvider(serviceName, serviceVersion string) (func(context.Context) error, error) {
+	// Create resource describing this application.
+	res, err := resource.New(context.Background(),
+		resource.WithAttributes(
+			semconv.ServiceName(serviceName),
+			semconv.ServiceVersion(serviceVersion),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	// Create stdout exporter to print traces to stdout.
+	// You might replace this with an OTLP exporter in production.
+	traceExporter, err := stdouttrace.New(
+		stdouttrace.WithPrettyPrint(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
+	}
+
+	// Create TracerProvider with the exporter and resource.
+	bsp := sdktrace.NewBatchSpanProcessor(traceExporter)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithSpanProcessor(bsp),
+		sdktrace.WithResource(res),
+	)
+
+	// Set the global TracerProvider and Propagator.
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	// Return a function to shutdown the TracerProvider.
+	return tp.Shutdown, nil
+}

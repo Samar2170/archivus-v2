@@ -27,7 +27,7 @@ func (m *LogMiddleware) Func() mux.MiddlewareFunc {
 			logRespWriter := NewLogResponseWriter(w)
 			next.ServeHTTP(logRespWriter, r)
 
-			m.logger.Printf(
+			LogWith(r.Context(), *m.logger).Msgf(
 				"duration=%s status=%d",
 				time.Since(startTime).String(),
 				logRespWriter.statusCode)
