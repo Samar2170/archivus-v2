@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/akamensky/argparse"
 )
@@ -33,10 +34,19 @@ func main() {
 		Help:     "Base URL of the server (e.g., http://localhost:8080)",
 		Default:  "http://localhost:8000",
 	})
+	debugMode := parser.Flag("d", "debug", &argparse.Options{
+		Required: false,
+		Help:     "Enable debug mode",
+	})
+	// usage
+	// go-client -f /path/to/largefile -u http://localhost:8000
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Println(parser.Usage(err))
 		return
 	}
-	runBigUploadInteractive(*baseUrl, *filepath)
+	t0 := time.Now()
+	runBigUploadInteractive(*baseUrl, *filepath, *debugMode)
+	t1 := time.Now()
+	fmt.Printf("Total upload time: %v\n", t1.Sub(t0))
 }
