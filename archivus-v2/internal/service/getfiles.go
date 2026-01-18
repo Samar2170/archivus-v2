@@ -48,6 +48,7 @@ type DirEntry struct {
 	SignedUrl string
 	Size      float64
 	Path      string
+	Thumbnail string
 
 	NavigationPath string
 }
@@ -134,6 +135,16 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		if file.Name()[0] == '.' {
 			continue
 		}
+
+		thumbUrl := ""
+		thumbPath, err := EnsureThumbnail(filepath.Join(folder, file.Name()))
+		if err == nil && thumbPath != "" {
+			signedThumb, err := GetSignedUrl(thumbPath, user.ID.String())
+			if err == nil {
+				thumbUrl = backendAddr + "/files/download/" + signedThumb
+			}
+		}
+
 		entries = append(entries, DirEntry{
 			ID:        fmdId,
 			Name:      file.Name(),
@@ -141,6 +152,7 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 			IsDir:     file.IsDir(),
 			Extension: filepath.Ext(file.Name()),
 			SignedUrl: backendAddr + "/files/download/" + signedUrl,
+			Thumbnail: thumbUrl,
 			Size:      GetSizeForDirEntry(file),
 		})
 	}
