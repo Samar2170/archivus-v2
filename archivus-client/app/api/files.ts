@@ -17,6 +17,7 @@ export interface FileMetaData {
     Size: number;
     Path: string;
     NavigationPath: string;
+    Thumbnail: string;
 
 }
 
