@@ -1,6 +1,7 @@
 import { get } from "http";
 import { apiFetch } from "../utils/fetcher";
 import { baseUrl } from "../data/constants";
+import { useAuthStore } from "../store/auth";
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL; // adjust to match your backend
@@ -70,7 +71,6 @@ export function uploadFilesWithProgress(
         xhr.open("POST", `${BASE_URL}files/upload/`);
 
         // Get token from store
-        const { useAuthStore } = require("../store/auth");
         const token = useAuthStore.getState().token;
         if (token) {
             xhr.setRequestHeader("Authorization", `Bearer ${token}`);
