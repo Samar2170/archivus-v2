@@ -54,6 +54,7 @@ sudo chmod +x "$BIN_DIR/$PROJECT_NAME"
 # Copy frontend files
 cp -r dist/frontend/* "$INSTALL_DIR/frontend/"
 cp -r dist/frontend/.next "$INSTALL_DIR/frontend/.next"
+cp -r dist/frontend/public "$INSTALL_DIR/frontend/public"
 cd "$INSTALL_DIR/frontend"
 npm install --production
 
