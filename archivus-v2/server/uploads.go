@@ -8,7 +8,11 @@ import (
 )
 
 func UploadFilesHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(32 << 20) // 32 MB max memory, adjust as needed
+	// Set max request body size to 500 MB for video support
+	r.Body = http.MaxBytesReader(w, r.Body, 500<<20)
+
+	// Parse multipart form with 256 MB max memory (rest goes to temp files)
+	err := r.ParseMultipartForm(256 << 20)
 	if err != nil {
 		logging.Errorlogger.Error().Msg(err.Error())
 		response.BadRequestResponse(w, err.Error())
@@ -32,10 +36,9 @@ func UploadFilesHandler(w http.ResponseWriter, r *http.Request) {
 			response.BadRequestResponse(w, "Error opening file: "+fileHeader.Filename)
 			return
 		}
+		defer file.Close()
 
 		err = service.SaveFile(file, fileHeader, username, folderPath, "")
-		file.Close()
-
 		if err != nil {
 			logging.Errorlogger.Error().Msg(err.Error())
 			response.InternalServerErrorResponse(w, "Error saving file: "+fileHeader.Filename)
