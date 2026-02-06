@@ -11,10 +11,12 @@ import (
 )
 
 type HostingConfiguration struct {
-	BaseUrl string `yaml:"base_url"`
-	Port    string `yaml:"port"`
-	Scheme  string `yaml:"scheme"`
+	BaseUrl  string `yaml:"base_url"`
+	Port     string `yaml:"port"`
+	Scheme   string `yaml:"scheme"`
+	BindAddr string `yaml:"bind_addr"`
 }
+
 
 type Configuration struct {
 	Mode               string               `yaml:"mode"`

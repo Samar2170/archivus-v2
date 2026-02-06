@@ -64,8 +64,9 @@ func GetServer(testEnv bool) *http.Server {
 
 	server := &http.Server{
 		Handler: otelHandler,
-		Addr:    config.GetBackendAddr(),
+		Addr:    config.GetBackendBindAddr(),
 	}
+
 	return server
 }
 
@@ -89,7 +90,8 @@ func RunServer() {
 			logging.Errorlogger.Printf("Failed to start server: %v", err)
 		}
 	}()
-	fmt.Printf("Server is running at %s\n", config.GetBackendAddr())
+	fmt.Printf("Server is running at %s\n", config.GetBackendBindAddr())
+
 	<-stop
 
 	log.Println("Shutting down server...")

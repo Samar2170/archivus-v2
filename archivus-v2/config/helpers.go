@@ -18,9 +18,17 @@ func generateRandomString(length int) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(bytes), nil
 }
 
+func GetBackendBindAddr() string {
+	if Config.BackendConfig.BindAddr != "" {
+		return Config.BackendConfig.BindAddr + ":" + Config.BackendConfig.Port
+	}
+	return GetBackendAddr()
+}
+
 func GetBackendAddr() string {
 	return Config.BackendConfig.BaseUrl + ":" + Config.BackendConfig.Port
 }
+
 func GetBackendScheme() string {
 	return Config.BackendConfig.Scheme
 }
