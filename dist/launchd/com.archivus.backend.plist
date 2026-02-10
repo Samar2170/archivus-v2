@@ -6,10 +6,10 @@
     <string>com.archivus.backend</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/archivus-v2</string>
+        <string>/Users/samararora/archivus-v2/bin/archivus-v2</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/usr/local/archivus-v2</string>
+    <string>/Users/samararora/archivus-v2</string>
     <key>KeepAlive</key>
     <true/>
     <key>RunAtLoad</key>

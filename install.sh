@@ -45,7 +45,11 @@ if [ "$OS" = "Linux" ]; then
     sudo cp "dist/bin/linux_amd64/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME"
     sudo cp dist/bin/linux_amd64/config.prod.yaml "$BIN_DIR/config.prod.yaml"
 elif [ "$OS" = "Darwin" ]; then
-    sudo cp "dist/bin/macos_arm/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME" 
+    if [ "$ARCH" = "arm64" ]; then
+        sudo cp "dist/bin/macos_arm64/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME" 
+    else
+        sudo cp "dist/bin/macos_amd64/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME" 
+    fi
 fi
 
 sudo chmod +x "$BIN_DIR/$PROJECT_NAME"
@@ -116,8 +120,8 @@ fi
 
 # Set up launchd (macOS)
 if [ "$OS" = "Darwin" ]; then
-    cp launchd/com.myapp.backend.plist "$LAUNCHD_DIR/"
-    launchctl load "$LAUNCHD_DIR/com.myapp.backend.plist"
+    cp dist/launchd/com.archivus.backend.plist "$LAUNCHD_DIR/"
+    launchctl load "$LAUNCHD_DIR/com.archivus.backend.plist"
     echo "Launchd service installed and started."
     # Note: Next.js can be run manually or via another launchd service
 fi
