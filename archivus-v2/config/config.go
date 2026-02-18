@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -37,6 +38,36 @@ type Configuration struct {
 }
 
 var Config *Configuration
+
+func (c *Configuration) Print() {
+	fmt.Println("Configuration:")
+	fmt.Printf("  Mode: %s\n", c.Mode)
+	fmt.Printf("  MultiUser: %v\n", c.MultiUser)
+	fmt.Printf("  DefaultWriteAccess: %v\n", c.DefaultWriteAccess)
+	fmt.Printf("  UserDirStructure: %v\n", c.UserDirStructure)
+	fmt.Printf("  UserDirLock: %v\n", c.UserDirLock)
+	fmt.Printf("  MasterPinUploads: %v\n", c.MasterPinUploads)
+	fmt.Printf("  MasterPin: %s\n", c.MasterPin)
+	fmt.Printf("  LogsDir: %s\n", c.LogsDir)
+	fmt.Printf("  StorageDbFile: %s\n", c.StorageDbFile)
+	fmt.Printf("  SecretKey: %s\n", c.SecretKey)
+	fmt.Printf("  BotToken: %s\n", c.BotToken)
+	fmt.Printf("  BaseDir: %s\n", c.BaseDir)
+	fmt.Printf("  ServerSalt: %s\n", c.ServerSalt)
+	fmt.Printf("  AllowedOrigins: %v\n", c.AllowedOrigins)
+
+	fmt.Println("  BackendConfig:")
+	fmt.Printf("    BaseUrl: %s\n", c.BackendConfig.BaseUrl)
+	fmt.Printf("    Port: %s\n", c.BackendConfig.Port)
+	fmt.Printf("    Scheme: %s\n", c.BackendConfig.Scheme)
+	fmt.Printf("    BindAddr: %s\n", c.BackendConfig.BindAddr)
+
+	fmt.Println("  FrontEndConfig:")
+	fmt.Printf("    BaseUrl: %s\n", c.FrontEndConfig.BaseUrl)
+	fmt.Printf("    Port: %s\n", c.FrontEndConfig.Port)
+	fmt.Printf("    Scheme: %s\n", c.FrontEndConfig.Scheme)
+	fmt.Printf("    BindAddr: %s\n", c.FrontEndConfig.BindAddr)
+}
 
 var OS string
 var Arch string
