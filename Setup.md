@@ -16,3 +16,4 @@ source .bashrc
 nvm install node
 
 sudo apt update && sudo apt install libatomic1
+sudo apt install -y gcc libsqlite3-dev
