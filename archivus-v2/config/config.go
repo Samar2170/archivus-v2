@@ -17,23 +17,23 @@ type HostingConfiguration struct {
 	BindAddr string `yaml:"bind_addr"`
 }
 
-
 type Configuration struct {
-	Mode               string               `yaml:"mode"`
-	MultiUser          bool                 `yaml:"multi_user"`
-	DefaultWriteAccess bool                 `yaml:"default_write_access"`
-	UserDirStructure   bool                 `yaml:"user_dir_structure"`
-	UserDirLock        bool                 `yaml:"user_dir_lock"`
-	MasterPinUploads   bool                 `yaml:"master_pin_uploads"`
-	MasterPin          string               `yaml:"master_pin"`
-	LogsDir            string               `yaml:"logs_dir"`
-	StorageDbFile      string               `yaml:"storage_db_file"`
-	SecretKey          string               `yaml:"secret_key"`
-	BotToken           string               `yaml:"bot_token"` // Added BotToken to the configuration
-	BaseDir            string               `yaml:"base_dir"`
-	BackendConfig      HostingConfiguration `yaml:"backend_config"`
-	FrontEndConfig     HostingConfiguration `yaml:"frontend_config"`
-	ServerSalt         string               `yaml:"server_salt"`
+	Mode                string               `yaml:"mode"`
+	MultiUser           bool                 `yaml:"multi_user"`
+	DefaultWriteAccess  bool                 `yaml:"default_write_access"`
+	UserDirStructure    bool                 `yaml:"user_dir_structure"`
+	UserDirLock         bool                 `yaml:"user_dir_lock"`
+	MasterPinUploads    bool                 `yaml:"master_pin_uploads"`
+	MasterPin           string               `yaml:"master_pin"`
+	LogsDir             string               `yaml:"logs_dir"`
+	StorageDbFile       string               `yaml:"storage_db_file"`
+	SecretKey           string               `yaml:"secret_key"`
+	BotToken            string               `yaml:"bot_token"` // Added BotToken to the configuration
+	BaseDir             string               `yaml:"base_dir"`
+	BackendConfig       HostingConfiguration `yaml:"backend_config"`
+	FrontEndConfig      HostingConfiguration `yaml:"frontend_config"`
+	BackendNetworkConfg HostingConfiguration `yaml:"backend_network_config"`
+	ServerSalt          string               `yaml:"server_salt"`
 }
 
 var Config *Configuration
