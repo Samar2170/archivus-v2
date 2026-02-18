@@ -21,7 +21,6 @@ func SetupCors() {
 	allowedOrigins = append(allowedOrigins, "http://localhost:3000")
 	allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://%s:%s", config.Config.FrontEndConfig.BaseUrl, config.Config.FrontEndConfig.Port))
 	allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://%s:%s/", config.Config.FrontEndConfig.BaseUrl, config.Config.FrontEndConfig.Port))
-	allowedOrigins = append(allowedOrigins, fmt.Sprintf("%s://%s", config.Config.BackendNetworkConfg.Scheme, config.Config.BackendNetworkConfg.BaseUrl))
 	logger := cors.Logger(&logging.AuditLogger)
 
 	CorsConfig = cors.New(cors.Options{
