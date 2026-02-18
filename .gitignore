@@ -11,3 +11,5 @@ dist/frontend/*
 dist/bin/*
 
 archivus-go-client
+
+nginx.conf

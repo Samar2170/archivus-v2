@@ -29,6 +29,7 @@ build:
 
 	rm -rf dist/frontend
 	mkdir -p dist/frontend
+	cd archivus-client && npm install
 	cd archivus-client && npm run build
 	cp -r archivus-client/.next dist/frontend/.next && cp archivus-client/package.json dist/frontend/ && cp -r archivus-client/public dist/frontend/public
 
