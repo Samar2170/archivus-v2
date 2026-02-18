@@ -32,6 +32,7 @@ type Configuration struct {
 	BaseDir            string               `yaml:"base_dir"`
 	BackendConfig      HostingConfiguration `yaml:"backend_config"`
 	FrontEndConfig     HostingConfiguration `yaml:"frontend_config"`
+	AllowedOrigins     []string             `yaml:"allowed_origins"`
 	ServerSalt         string               `yaml:"server_salt"`
 }
 
