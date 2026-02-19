@@ -1,0 +1,26 @@
+# Dockerfile.verify
+FROM ubuntu:22.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the Linux binary
+COPY dist/bin/linux_amd64/archivus-v2 ./archivus-v2
+RUN chmod +x ./archivus-v2
+
+# Copy the frontend (if needed for runtime, though usually served by backend or nginx)
+COPY dist/frontend ./frontend
+
+# Copy a default config
+COPY archivus-v2/config.prod.yaml ./config.prod.yaml
+
+# Create a test user environment
+RUN mkdir -p /app/logs /app/storage
+
+# Run version check as a basic verification
+CMD ["./archivus-v2", "-v"]
