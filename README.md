@@ -34,3 +34,22 @@ Archivus is a tool to host your filesystem on a network, allowing secure access 
    ```bash
    git clone https://github.com/your-username/Archivus.git
    cd Archivus
+   ```
+
+2. Build and release:
+   ```bash
+   make build    # Build both backend and frontend
+   make package  # Create release archives in dist/packages
+   ```
+
+## Versioning
+You can check the current version of the Archivus backend by running:
+```bash
+./archivus-v2/archivus-v2 -v
+```
+
+## Release Structure
+The `make package` command generates archives for different platforms in the `dist/packages/` directory:
+- `archivus-v2-<version>-linux-amd64.tar.gz`
+- `archivus-v2-<version>-darwin-amd64.tar.gz`
+- `archivus-v2-<version>-darwin-arm64.tar.gz`
