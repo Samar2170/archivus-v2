@@ -17,6 +17,7 @@ func main() {
 	serverCmd := parser.NewCommand("server", "Run the archivus server")
 	newUserCmd := parser.NewCommand("new-user", "Create a new master user")
 	featureCmd := parser.NewCommand("feature", "Add a new feature")
+	checkConfig := parser.NewCommand("check-config", "Check the config")
 	toggleUserSettingsCmd := parser.NewCommand("user-settings", "Toggle user settings")
 
 	m := parser.String("m", "mode", &argparse.Options{
@@ -55,6 +56,9 @@ func main() {
 	case cleanupSyncDirCmd.Happened():
 		fmt.Println("Cleaning up sync directory...")
 		syncer.CleanupDirQueue()
+	case checkConfig.Happened():
+		fmt.Println("Checking config...")
+		config.Config.Print()
 	default:
 		fmt.Println("No command provided. Use -h for help.")
 	}

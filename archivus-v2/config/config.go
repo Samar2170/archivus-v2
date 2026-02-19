@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,25 +19,55 @@ type HostingConfiguration struct {
 }
 
 type Configuration struct {
-	Mode                string               `yaml:"mode"`
-	MultiUser           bool                 `yaml:"multi_user"`
-	DefaultWriteAccess  bool                 `yaml:"default_write_access"`
-	UserDirStructure    bool                 `yaml:"user_dir_structure"`
-	UserDirLock         bool                 `yaml:"user_dir_lock"`
-	MasterPinUploads    bool                 `yaml:"master_pin_uploads"`
-	MasterPin           string               `yaml:"master_pin"`
-	LogsDir             string               `yaml:"logs_dir"`
-	StorageDbFile       string               `yaml:"storage_db_file"`
-	SecretKey           string               `yaml:"secret_key"`
-	BotToken            string               `yaml:"bot_token"` // Added BotToken to the configuration
-	BaseDir             string               `yaml:"base_dir"`
-	BackendConfig       HostingConfiguration `yaml:"backend_config"`
-	FrontEndConfig      HostingConfiguration `yaml:"frontend_config"`
-	BackendNetworkConfg HostingConfiguration `yaml:"backend_network_config"`
-	ServerSalt          string               `yaml:"server_salt"`
+	Mode               string               `yaml:"mode"`
+	MultiUser          bool                 `yaml:"multi_user"`
+	DefaultWriteAccess bool                 `yaml:"default_write_access"`
+	UserDirStructure   bool                 `yaml:"user_dir_structure"`
+	UserDirLock        bool                 `yaml:"user_dir_lock"`
+	MasterPinUploads   bool                 `yaml:"master_pin_uploads"`
+	MasterPin          string               `yaml:"master_pin"`
+	LogsDir            string               `yaml:"logs_dir"`
+	StorageDbFile      string               `yaml:"storage_db_file"`
+	SecretKey          string               `yaml:"secret_key"`
+	BotToken           string               `yaml:"bot_token"` // Added BotToken to the configuration
+	BaseDir            string               `yaml:"base_dir"`
+	BackendConfig      HostingConfiguration `yaml:"backend_config"`
+	FrontEndConfig     HostingConfiguration `yaml:"frontend_config"`
+	AllowedOrigins     []string             `yaml:"allowed_origins"`
+	ServerSalt         string               `yaml:"server_salt"`
 }
 
 var Config *Configuration
+
+func (c *Configuration) Print() {
+	fmt.Println("Configuration:")
+	fmt.Printf("  Mode: %s\n", c.Mode)
+	fmt.Printf("  MultiUser: %v\n", c.MultiUser)
+	fmt.Printf("  DefaultWriteAccess: %v\n", c.DefaultWriteAccess)
+	fmt.Printf("  UserDirStructure: %v\n", c.UserDirStructure)
+	fmt.Printf("  UserDirLock: %v\n", c.UserDirLock)
+	fmt.Printf("  MasterPinUploads: %v\n", c.MasterPinUploads)
+	fmt.Printf("  MasterPin: %s\n", c.MasterPin)
+	fmt.Printf("  LogsDir: %s\n", c.LogsDir)
+	fmt.Printf("  StorageDbFile: %s\n", c.StorageDbFile)
+	fmt.Printf("  SecretKey: %s\n", c.SecretKey)
+	fmt.Printf("  BotToken: %s\n", c.BotToken)
+	fmt.Printf("  BaseDir: %s\n", c.BaseDir)
+	fmt.Printf("  ServerSalt: %s\n", c.ServerSalt)
+	fmt.Printf("  AllowedOrigins: %v\n", c.AllowedOrigins)
+
+	fmt.Println("  BackendConfig:")
+	fmt.Printf("    BaseUrl: %s\n", c.BackendConfig.BaseUrl)
+	fmt.Printf("    Port: %s\n", c.BackendConfig.Port)
+	fmt.Printf("    Scheme: %s\n", c.BackendConfig.Scheme)
+	fmt.Printf("    BindAddr: %s\n", c.BackendConfig.BindAddr)
+
+	fmt.Println("  FrontEndConfig:")
+	fmt.Printf("    BaseUrl: %s\n", c.FrontEndConfig.BaseUrl)
+	fmt.Printf("    Port: %s\n", c.FrontEndConfig.Port)
+	fmt.Printf("    Scheme: %s\n", c.FrontEndConfig.Scheme)
+	fmt.Printf("    BindAddr: %s\n", c.FrontEndConfig.BindAddr)
+}
 
 var OS string
 var Arch string

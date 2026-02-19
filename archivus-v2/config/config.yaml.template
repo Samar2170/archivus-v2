@@ -14,7 +14,6 @@ frontend_config:
   base_url: localhost
   port: 8001
   scheme: http
-backend_network_config:
-  base_url: localhost
-  port: 9000
-  scheme: http
+allowed_origins:
+  - http://localhost:8001
+  - http://127.0.0.1:8001

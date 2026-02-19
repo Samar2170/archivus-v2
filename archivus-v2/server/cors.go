@@ -11,7 +11,10 @@ import (
 var CorsConfig *cors.Cors
 
 func SetupCors() {
-	allowedOrigins := []string{}
+	allowedOrigins := config.Config.AllowedOrigins
+
+	// Add default local frontend URL if not present
+	defaultFrontend := fmt.Sprintf("http://%s:%s", config.Config.FrontEndConfig.BaseUrl, config.Config.FrontEndConfig.Port)
 	for i := 1; i < 255; i++ {
 		allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://192.168.1.%d:%s", i, config.Config.FrontEndConfig.Port))
 	}
@@ -19,9 +22,18 @@ func SetupCors() {
 		allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://localhost:%d", 3000+i))
 	}
 	allowedOrigins = append(allowedOrigins, "http://localhost:3000")
-	allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://%s:%s", config.Config.FrontEndConfig.BaseUrl, config.Config.FrontEndConfig.Port))
-	allowedOrigins = append(allowedOrigins, fmt.Sprintf("http://%s:%s/", config.Config.FrontEndConfig.BaseUrl, config.Config.FrontEndConfig.Port))
-	allowedOrigins = append(allowedOrigins, fmt.Sprintf("%s://%s", config.Config.BackendNetworkConfg.Scheme, config.Config.BackendNetworkConfg.BaseUrl))
+
+	found := false
+	for _, origin := range allowedOrigins {
+		if origin == defaultFrontend {
+			found = true
+			break
+		}
+	}
+	if !found {
+		allowedOrigins = append(allowedOrigins, defaultFrontend)
+	}
+
 	logger := cors.Logger(&logging.AuditLogger)
 
 	CorsConfig = cors.New(cors.Options{
