@@ -27,6 +27,14 @@ func main() {
 
 	syncCmd := parser.NewCommand("sync", "Sync files")
 	cleanupSyncDirCmd := parser.NewCommand("cleanup-sync-queue", "Cleanup sync directory")
+
+	for _, arg := range os.Args {
+		if arg == "-v" || arg == "--version" {
+			fmt.Printf("Archivus v2 version %s\n", config.Version)
+			return
+		}
+	}
+
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Println(parser.Usage(err))

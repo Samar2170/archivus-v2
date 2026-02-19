@@ -20,6 +20,7 @@ const (
 	sessionsDir = ".sessions"
 	TmpSuffix   = ".tmp"
 	MaxChunks   = 1024
+	Version     = "0.1.0-beta.1"
 )
 
 func GetSessionsDir() string {
