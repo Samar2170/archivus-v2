@@ -35,6 +35,7 @@ type Configuration struct {
 	FrontEndConfig     HostingConfiguration `yaml:"frontend_config"`
 	AllowedOrigins     []string             `yaml:"allowed_origins"`
 	ServerSalt         string               `yaml:"server_salt"`
+	BackendProxyUrl    string               `yaml:"backend_proxy_url"`
 }
 
 var Config *Configuration
