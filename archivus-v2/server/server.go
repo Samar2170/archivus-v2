@@ -58,19 +58,8 @@ func GetServer(testEnv bool) *http.Server {
 
 	logMiddleware := logging.NewLogMiddleware(&logger)
 	mux.Use(logMiddleware.Func())
-	mux.Use(middleware.AuthMiddleware)
-	// CORS must be the outermost wrapper. Gorilla mux was returning 405 on
-	// OPTIONS preflight requests (no route registered for OPTIONS), which caused
-	// the CORS handler to drop the CORS response headers entirely.
-	// Wrapping mux directly (with auth as a mux-level Use middleware) fixes this.
-	mux.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Let CORS handle OPTIONS preflights; reject everything else.
-		if r.Method == http.MethodOptions {
-			return
-		}
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-	})
-	wrappedMux := CorsConfig.Handler(mux)
+	wrappedMux := middleware.AuthMiddleware(mux)
+	wrappedMux = CorsConfig.Handler(wrappedMux)
 	otelHandler := otelhttp.NewHandler(wrappedMux, "server")
 
 	server := &http.Server{
