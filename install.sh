@@ -42,10 +42,24 @@ fi
 
 
 if [ "$OS" = "Linux" ]; then
-    sudo cp "dist/bin/linux_amd64/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME"
-    sudo cp dist/bin/linux_amd64/config.prod.yaml "$BIN_DIR/config.prod.yaml"
+    if [ "$ARCH" = "x86_64" ]; then
+        sudo cp "dist/bin/linux_amd64/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME"
+        sudo cp dist/bin/linux_amd64/config.prod.yaml "$BIN_DIR/config.prod.yaml"
+    else
+        echo "Unsupported architecture: $ARCH"
+        exit 1
+    fi
 elif [ "$OS" = "Darwin" ]; then
-    sudo cp "dist/bin/macos_arm/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME" 
+    if [ "$ARCH" = "arm64" ]; then
+        sudo cp "dist/bin/darwin_arm64/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME"
+    elif [ "$ARCH" = "x86_64" ]; then
+        sudo cp "dist/bin/darwin_amd64/$PROJECT_NAME" "$BIN_DIR/$PROJECT_NAME"
+    else
+        echo "Unsupported architecture: $ARCH"
+        exit 1
+    fi
+    # Copy config for macOS as well if needed, though usually it's in the same bin dir
+    sudo cp archivus-v2/config.prod.yaml "$BIN_DIR/config.prod.yaml"
 fi
 
 sudo chmod +x "$BIN_DIR/$PROJECT_NAME"
@@ -110,6 +124,9 @@ if [ "$OS" = "Linux" ]; then
     sudo systemctl enable archivus_client.service
     sudo systemctl start archivus_v2.service
     sudo systemctl start archivus_client.service
+
+    sudo systemctl restart archivus_v2.service
+    sudo systemctl restart archivus_client.service
     echo "Systemd services installed and started."
 fi
 

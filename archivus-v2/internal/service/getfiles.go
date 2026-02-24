@@ -106,15 +106,16 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 
 	var entries []DirEntry
 	var backendAddr string
-
-	if config.Config.Mode == "net" {
+	if config.Config.Mode == "prod" {
+		if config.Config.BackendProxyUrl != "" {
+			backendAddr = fmt.Sprintf("%s/", config.Config.BackendProxyUrl)
+		}
+	} else if config.Config.Mode == "net" || backendAddr == "" {
 		currentIp, err := utils.GetPrivateIp()
 		if err != nil {
 			return nil, 0, utils.HandleError("FindFiles", "Failed to get current IP address", err)
 		}
 		backendAddr = fmt.Sprintf("%s://%s:%s", config.GetBackendScheme(), currentIp, config.Config.BackendConfig.Port)
-	} else {
-		backendAddr = fmt.Sprintf("%s://%s", config.GetBackendScheme(), config.GetBackendAddr())
 	}
 	fmdMap, err := getFileMetadatas(&files, folder)
 	if err != nil {
