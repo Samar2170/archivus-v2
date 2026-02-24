@@ -39,7 +39,7 @@ func SetupCors() {
 	CorsConfig = cors.New(cors.Options{
 		AllowedOrigins:   allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH", "HEAD"},
-		AllowedHeaders:   []string{"*"},
+		AllowedHeaders:   []string{"Origin", "Accept", "Content-Type", "Authorization", "X-Requested-With", "AccessKey"},
 		AllowCredentials: true,
 		Logger:           logger,
 	})
