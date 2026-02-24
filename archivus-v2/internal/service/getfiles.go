@@ -108,7 +108,7 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 	var backendAddr string
 	if config.Config.Mode == "prod" {
 		if config.Config.BackendProxyUrl != "" {
-			backendAddr = fmt.Sprintf("%s/", config.Config.BackendProxyUrl)
+			backendAddr = config.Config.BackendProxyUrl
 		}
 	} else if config.Config.Mode == "net" || backendAddr == "" {
 		currentIp, err := utils.GetPrivateIp()
