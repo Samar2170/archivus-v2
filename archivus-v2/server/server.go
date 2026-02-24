@@ -58,8 +58,7 @@ func GetServer(testEnv bool) *http.Server {
 
 	logMiddleware := logging.NewLogMiddleware(&logger)
 	mux.Use(logMiddleware.Func())
-	wrappedMux := middleware.AuthMiddleware(mux)
-	wrappedMux = CorsConfig.Handler(wrappedMux)
+	wrappedMux := CorsConfig.Handler(middleware.AuthMiddleware(mux))
 	otelHandler := otelhttp.NewHandler(wrappedMux, "server")
 
 	server := &http.Server{

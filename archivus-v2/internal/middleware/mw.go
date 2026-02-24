@@ -29,6 +29,11 @@ func CheckExemptPath(path string) bool {
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Preflight requests must bypass auth — they carry no credentials
+		if r.Method == http.MethodOptions {
+			next.ServeHTTP(w, r)
+			return
+		}
 		exempt := CheckExemptPath(r.URL.Path)
 		if exempt {
 			next.ServeHTTP(w, r)
