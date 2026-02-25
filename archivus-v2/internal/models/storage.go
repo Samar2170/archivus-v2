@@ -64,3 +64,18 @@ func GetOrCreateDir(userId uuid.UUID, name string, isUserDir bool) Directory {
 	db.StorageDB.FirstOrCreate(&dir, Directory{UserID: userId, Name: name, IsUserDir: isUserDir})
 	return dir
 }
+
+type FileContentHash struct {
+	*gorm.Model
+	ID             uuid.UUID `gorm:"type:uuid;primaryKey"`
+	User           User      `gorm:"foreignKey:UserID"`
+	UserID         uuid.UUID
+	FileMetadata   FileMetadata `gorm:"foreignKey:FileMetadataID"`
+	FileMetadataID uuid.UUID
+	Path           string    `gorm:"uniqueIndex;size:4096;not null"`
+	Size           int64     `gorm:"index;not null"`
+	ModTime        time.Time `gorm:"not null"`
+	Hash           string    `gorm:"index;size:64;not null"` // BLAKE3 hex
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}

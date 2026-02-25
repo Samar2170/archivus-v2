@@ -55,6 +55,7 @@ func SaveFile(file multipart.File, fileHeader *multipart.FileHeader, username, f
 		return utils.HandleError("SaveFile", "Failed to open file for writing", err)
 	}
 	defer f.Close()
+	// TODO: call CreateFileHash here
 	reader := bufio.NewReader(file)
 	writer := io.Writer(f)
 	_, err = io.Copy(writer, reader)
