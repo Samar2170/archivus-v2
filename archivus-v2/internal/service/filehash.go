@@ -5,6 +5,10 @@ import (
 	"io"
 	"os"
 
+	"archivus-v2/internal/db"
+	"archivus-v2/internal/models"
+
+	"github.com/google/uuid"
 	"github.com/zeebo/blake3"
 )
 
@@ -25,5 +29,26 @@ func HashFileBlake3(path string) (string, int64, error) {
 	return hex.EncodeToString(sum), size, nil
 }
 
-// TODO: complete this function
-func CreateFileHash()
+func CreateFileHash(filePath string, fileMetadataID uint, userID uuid.UUID) error {
+	hashStr, size, err := HashFileBlake3(filePath)
+	if err != nil {
+		return err
+	}
+
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		return err
+	}
+
+	hashRecord := models.FileContentHash{
+		ID:             uuid.New(),
+		UserID:         userID,
+		FileMetadataID: fileMetadataID,
+		Path:           filePath,
+		Size:           size,
+		ModTime:        fileInfo.ModTime(),
+		Hash:           hashStr,
+	}
+
+	return db.StorageDB.Create(&hashRecord).Error
+}

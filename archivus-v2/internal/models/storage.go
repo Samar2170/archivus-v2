@@ -71,7 +71,7 @@ type FileContentHash struct {
 	User           User      `gorm:"foreignKey:UserID"`
 	UserID         uuid.UUID
 	FileMetadata   FileMetadata `gorm:"foreignKey:FileMetadataID"`
-	FileMetadataID uuid.UUID
+	FileMetadataID uint
 	Path           string    `gorm:"uniqueIndex;size:4096;not null"`
 	Size           int64     `gorm:"index;not null"`
 	ModTime        time.Time `gorm:"not null"`
