@@ -94,6 +94,14 @@ func LoginUser(req LoginUserRequest) (string, string, error) {
 func ToggleUserSettingsByMaster(user models.User, userDirLock, writeAccess bool) error {
 	var err error
 	tx := db.StorageDB.Begin()
+	if userDirLock {
+		fmt.Println("Setting up user directory")
+		err = dirmanager.CreateDirForUser(user)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
 	user.UserDirLock = userDirLock
 	user.WriteAccess = writeAccess
 	err = tx.Save(&user).Error
