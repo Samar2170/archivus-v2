@@ -152,7 +152,7 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		entries = append(entries, DirEntry{
 			ID:        fmdId,
 			Name:      file.Name(),
-			Path:      filepath.Join(pathFromUploadsDir, file.Name()),
+			Path:      filepath.Join(folder, file.Name()),
 			IsDir:     file.IsDir(),
 			Extension: filepath.Ext(file.Name()),
 			SignedUrl: backendAddr + "/files/download/" + signedUrl,
