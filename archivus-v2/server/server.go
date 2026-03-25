@@ -30,7 +30,6 @@ func GetServer(testEnv bool) *http.Server {
 	SetupCors()
 	internal.SetupRun(testEnv)
 
-	logger := logging.AuditLogger
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/health", HealthCheck)
@@ -56,10 +55,10 @@ func GetServer(testEnv bool) *http.Server {
 	subRoute.HandleFunc("/todos/update", UpdateTodos).Methods("POST", "DELETE")
 	subRoute.HandleFunc("/projects", Projects).Methods("POST", "GET", "DELETE")
 
-	logMiddleware := logging.NewLogMiddleware(&logger)
-	mux.Use(logMiddleware.Func())
+	logMiddleware := logging.NewLogMiddleware()
 	wrappedMux := middleware.AuthMiddleware(mux)
 	wrappedMux = CorsConfig.Handler(wrappedMux)
+	wrappedMux = logMiddleware.Handler(wrappedMux)
 	otelHandler := otelhttp.NewHandler(wrappedMux, "server")
 
 	server := &http.Server{

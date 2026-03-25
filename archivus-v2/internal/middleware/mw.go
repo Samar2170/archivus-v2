@@ -10,7 +10,7 @@ import (
 	"archivus-v2/pkg/response"
 )
 
-var ExemptPaths = map[string]struct{}{"/files/download/": {}, "/login": {}}
+var ExemptPaths = map[string]struct{}{"/files/download/": {}, "/login": {}, "/health": {}}
 
 func CheckExemptPath(path string) bool {
 	for exemptPath := range ExemptPaths {
