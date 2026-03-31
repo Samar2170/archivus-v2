@@ -113,12 +113,14 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		if config.Config.BackendProxyUrl != "" {
 			backendAddr = config.Config.BackendProxyUrl
 		}
-	} else if config.Config.Mode == "net" || backendAddr == "" {
+	} else if config.Config.Mode == "net" && backendAddr == "" {
 		currentIp, err := utils.GetPrivateIp()
 		if err != nil {
 			return nil, 0, utils.HandleError("FindFiles", "Failed to get current IP address", err)
 		}
 		backendAddr = fmt.Sprintf("%s://%s:%s", config.GetBackendScheme(), currentIp, config.Config.BackendConfig.Port)
+	} else {
+		backendAddr = fmt.Sprintf("%s://%s:%s", config.GetBackendScheme(), "localhost", config.Config.BackendConfig.Port)
 	}
 	fmdMap, err := getFileMetadatas(&files, pathFromUploadsDir)
 	if err != nil {
