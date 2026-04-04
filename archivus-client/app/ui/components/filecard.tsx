@@ -36,7 +36,7 @@ export default function FileCard({ file }: { file: FileMetaData }) {
         // <Link href={`/?folder=${file.Path}`} className="flex flex-col items-center">
         <Folder className="w-20 h-20 text-blue-500" />
         // </Link> 
-      ) : file.SignedUrl && file.Extension.match(/(png|jpg|jpeg|gif|webp)$/i) ? (
+      ) : file.SignedUrl && file.Extension.match(/(png|jpg|jpeg|gif|webp|mp4|mkv|avi|mov|wmv|flv|webm|m4v|pdf)$/i) ? (
         <Link href={file.SignedUrl} className="flex flex-col items-center">
           {file.Thumbnail && file.Thumbnail != "" ?
             <Image

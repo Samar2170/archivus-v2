@@ -3,10 +3,13 @@ package logging
 import (
 	"archivus-v2/config"
 	"context"
+	"fmt"
+	"os"
 	"path/filepath"
 	"runtime/debug"
+	"sync"
+	"time"
 
-	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -15,36 +18,47 @@ var Errorlogger zerolog.Logger
 var AuditLogger zerolog.Logger
 var DebugLogger zerolog.Logger
 
+// dateWriter rotates to a new file each calendar day.
+type dateWriter struct {
+	mu      sync.Mutex
+	dir     string
+	prefix  string
+	date    string
+	file    *os.File
+}
+
+func newDateWriter(dir, prefix string) *dateWriter {
+	return &dateWriter{dir: dir, prefix: prefix}
+}
+
+func (w *dateWriter) Write(p []byte) (int, error) {
+	today := time.Now().Format("2006-01-02")
+
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	if w.file == nil || w.date != today {
+		if w.file != nil {
+			w.file.Close()
+		}
+		name := filepath.Join(w.dir, fmt.Sprintf("%s-%s.log", w.prefix, today))
+		f, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			return 0, err
+		}
+		w.file = f
+		w.date = today
+	}
+
+	return w.file.Write(p)
+}
+
 func SetupLogging() {
-	auditLogFilePath := filepath.Join(config.Config.LogsDir, "audit.log")
-	errorLogFilePath := filepath.Join(config.Config.LogsDir, "error.log")
-	debugLogFilePath := filepath.Join(config.Config.LogsDir, "debug.log")
+	dir := config.Config.LogsDir
 
-	auditLogFile := &lumberjack.Logger{
-		Filename:   auditLogFilePath,
-		MaxSize:    10,
-		MaxBackups: 3,
-		MaxAge:     28,
-		Compress:   false,
-	}
-	logFile := &lumberjack.Logger{
-		Filename:   errorLogFilePath,
-		MaxSize:    10,
-		MaxBackups: 3,
-		MaxAge:     28,
-		Compress:   false,
-	}
-	debugLogFile := &lumberjack.Logger{
-		Filename:   debugLogFilePath,
-		MaxSize:    20,
-		MaxBackups: 2,
-		MaxAge:     7,
-		Compress:   false,
-	}
-
-	Errorlogger = zerolog.New(logFile).With().Timestamp().Logger()
-	AuditLogger = zerolog.New(auditLogFile).With().Timestamp().Logger()
-	DebugLogger = zerolog.New(debugLogFile).Level(zerolog.DebugLevel).With().Timestamp().Logger()
+	Errorlogger = zerolog.New(newDateWriter(dir, "error")).With().Timestamp().Logger()
+	AuditLogger = zerolog.New(newDateWriter(dir, "audit")).With().Timestamp().Logger()
+	DebugLogger = zerolog.New(newDateWriter(dir, "debug")).Level(zerolog.DebugLevel).With().Timestamp().Logger()
 }
 
 func HandleError(err error) error {
