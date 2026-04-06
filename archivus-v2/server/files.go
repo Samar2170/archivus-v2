@@ -1,6 +1,7 @@
 package server
 
 import (
+	"archivus-v2/internal/models"
 	"archivus-v2/internal/service"
 	"archivus-v2/pkg/logging"
 	reqhelpers "archivus-v2/pkg/reqHelpers"
@@ -31,7 +32,14 @@ func GetFilesByFolder(w http.ResponseWriter, r *http.Request) {
 func GetSignedUrlHandler(w http.ResponseWriter, r *http.Request) {
 	filepath := mux.Vars(r)["filepath"]
 	userId := r.Header.Get("userId")
-	signedUrl, err := service.GetSignedUrl(filepath, userId)
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		logging.Errorlogger.Error().Msg(err.Error())
+		response.InternalServerErrorResponse(w, err.Error())
+		return
+	}
+	_, pathFromUploadsDir := service.ResolveFolderPath(&user, filepath)
+	signedUrl, err := service.GetSignedUrl(pathFromUploadsDir, userId)
 	// ownership check please
 	if err != nil {
 		logging.Errorlogger.Error().Msg(err.Error())

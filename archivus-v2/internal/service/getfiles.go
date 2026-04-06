@@ -86,13 +86,7 @@ func getFileMetadatas(files *[]os.DirEntry, pathFromUploadsDir string) (map[stri
 	return fmdMap, err
 }
 
-func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
-	user, err := models.GetUserById(userId)
-	if err != nil {
-		return nil, 0, utils.HandleError("FindFiles", "Failed to get user by API key", err)
-	}
-
-	// pathFromUploadsDir := resolveFolderName(user.Username, folder)
+func ResolveFolderPath(user *models.User, folder string) (string, string) {
 	var folderPath string
 	var pathFromUploadsDir string
 	if user.UserDirLock {
@@ -102,6 +96,16 @@ func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
 		folderPath = filepath.Join(config.Config.BaseDir, folder)
 		pathFromUploadsDir = folder
 	}
+	return folderPath, pathFromUploadsDir
+}
+
+func GetFiles(userId string, folder string) ([]DirEntry, float64, error) {
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		return nil, 0, utils.HandleError("FindFiles", "Failed to get user by API key", err)
+	}
+
+	folderPath, pathFromUploadsDir := ResolveFolderPath(&user, folder)
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		return nil, 0, utils.HandleError("FindFiles", "Failed to read directory", err)
