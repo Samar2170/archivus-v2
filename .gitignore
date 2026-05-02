@@ -13,3 +13,10 @@ dist/bin/*
 archivus-go-client
 
 nginx.conf
+
+
+node_modules
+
+.env
+
+.svelte-kit
