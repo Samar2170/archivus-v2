@@ -54,7 +54,7 @@ export async function uploadFiles(
 ): Promise<void> {
 	const formData = new FormData();
 	for (const file of files) {
-		formData.append('files', file);
+		formData.append('file', file);
 	}
 	formData.append('folder', folder);
 	await apiUpload('files/upload/', formData, onProgress);

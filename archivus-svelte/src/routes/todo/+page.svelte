@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { authStore } from '$lib/stores/auth';
-	import { getProjects, getTodos } from '$lib/api/todo';
-	import type { Project, Todo } from '$lib/api/todo';
-	import Navbar from '$lib/components/Navbar.svelte';
-	import TodoTable from '$lib/components/TodoTable.svelte';
-	import ProjectTable from '$lib/components/ProjectTable.svelte';
-	import TodoDialog from '$lib/components/TodoDialog.svelte';
+	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
+	import { authStore } from "$lib/stores/auth";
+	import { getProjects, getTodos } from "$lib/api/todo";
+	import type { Project, Todo } from "$lib/api/todo";
+	import Navbar from "$lib/components/Navbar.svelte";
+	import TodoTable from "$lib/components/TodoTable.svelte";
+	import ProjectTable from "$lib/components/ProjectTable.svelte";
+	import TodoDialog from "$lib/components/TodoDialog.svelte";
 
 	let projects: Project[] = [];
 	let todos: Todo[] = [];
 	let selectedProjectId: number | undefined = undefined;
 	let loading = false;
-	let error = '';
+	let error = "";
 
 	async function loadProjects() {
 		try {
@@ -26,7 +26,11 @@
 	async function loadTodos() {
 		loading = true;
 		try {
-			todos = await getTodos(selectedProjectId);
+			if (selectedProjectId !== undefined && selectedProjectId !== null) {
+				todos = await getTodos(selectedProjectId);
+			} else {
+				todos = await getTodos();
+			}
 		} catch (err) {
 			error = (err as Error).message;
 		} finally {
@@ -40,13 +44,16 @@
 
 	onMount(async () => {
 		if (!$authStore.isAuthenticated) {
-			goto('/login');
+			goto("/login");
 			return;
 		}
 		await refresh();
 	});
 
-	$: if ($authStore.isAuthenticated && selectedProjectId !== undefined || selectedProjectId === undefined) {
+	$: if (
+		($authStore.isAuthenticated && selectedProjectId !== undefined) ||
+		selectedProjectId === undefined
+	) {
 		loadTodos();
 	}
 
@@ -66,21 +73,30 @@
 		<h1 class="text-xl font-semibold text-gray-900">Projects</h1>
 
 		{#if error}
-			<div class="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</div>
+			<div class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+				{error}
+			</div>
 		{/if}
 
-		<ProjectTable {projects} {selectedProjectId} on:select={handleProjectSelect} />
+		<ProjectTable
+			{projects}
+			{selectedProjectId}
+			on:select={handleProjectSelect}
+		/>
 
 		<div>
 			<h2 class="mb-4 text-lg font-semibold text-gray-900">
 				{selectedProjectId !== undefined
-					? (projects.find((p) => p.id === selectedProjectId)?.title ?? 'Todos')
-					: 'Todos'}
+					? (projects.find((p) => p.id === selectedProjectId)
+							?.title ?? "Todos")
+					: "Todos"}
 			</h2>
 
 			{#if loading}
 				<div class="flex items-center justify-center py-12">
-					<div class="h-6 w-6 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+					<div
+						class="h-6 w-6 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"
+					/>
 				</div>
 			{:else}
 				<TodoTable {todos} on:refresh={refresh} />
