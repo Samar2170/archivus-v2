@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { FileMetaData } from '$lib/api/files';
-	import { Folder, FileText, File, Film, Image } from 'lucide-svelte';
+	import type { FileMetaData } from "$lib/api/files";
+	import { Folder, FileText, File, Film, Image } from "lucide-svelte";
 
 	export let file: FileMetaData;
 	export let dragging = false;
@@ -11,13 +11,14 @@
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 	}
 
-	$: ext = file.Extension?.toLowerCase() ?? '';
-	$: isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
-	$: isVideo = ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext);
-	$: isPdf = ext === 'pdf';
-	$: isDoc = ['doc', 'docx'].includes(ext);
-	$: isSheet = ['xls', 'xlsx', 'csv'].includes(ext);
-	$: hasThumbnail = !!(file.Thumbnail || file.SignedUrl) && (isImage || isVideo);
+	$: ext = file.Extension?.toLowerCase() ?? "";
+	$: isImage = ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext);
+	$: isVideo = ["mp4", "mov", "avi", "mkv", "webm"].includes(ext);
+	$: isPdf = ext === "pdf";
+	$: isDoc = ["doc", "docx"].includes(ext);
+	$: isSheet = ["xls", "xlsx", "csv"].includes(ext);
+	$: hasThumbnail =
+		!!(file.Thumbnail || file.SignedUrl) && (isImage || isVideo);
 </script>
 
 <div
@@ -27,9 +28,11 @@
 		{dragging ? 'opacity-50 scale-95' : ''}"
 >
 	<!-- Thumbnail / Icon -->
-	<div class="mb-3 flex h-20 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-50">
+	<div
+		class="mb-3 flex h-20 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-50"
+	>
 		{#if file.IsDir}
-			<Folder class="h-14 w-14 text-indigo-400" fill="currentColor" />
+			<Folder class="h-14 w-14 text-gray-600" fill="currentColor" />
 		{:else if hasThumbnail}
 			<img
 				src={file.Thumbnail || file.SignedUrl}
@@ -53,7 +56,10 @@
 	</div>
 
 	<!-- Name -->
-	<p class="w-full truncate text-center text-sm font-medium text-gray-800" title={file.Name}>
+	<p
+		class="w-full truncate text-center text-sm font-medium text-gray-800"
+		title={file.Name}
+	>
 		{file.Name}
 	</p>
 

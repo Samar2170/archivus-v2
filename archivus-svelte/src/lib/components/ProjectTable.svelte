@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Project } from '$lib/api/todo';
-	import { createEventDispatcher } from 'svelte';
-	import { Folder } from 'lucide-svelte';
+	import type { Project } from "$lib/api/todo";
+	import { createEventDispatcher } from "svelte";
+	import { Folder } from "lucide-svelte";
 
 	export let projects: Project[] = [];
 	export let selectedProjectId: number | undefined = undefined;
@@ -9,7 +9,7 @@
 	const dispatch = createEventDispatcher<{ select: number | undefined }>();
 
 	function select(id: number | undefined) {
-		dispatch('select', id);
+		dispatch("select", id);
 	}
 </script>
 
@@ -20,10 +20,14 @@
 		class="flex flex-col items-center gap-2 rounded-xl border p-4 text-sm font-medium
 			transition-all hover:shadow-md
 			{selectedProjectId === undefined
-			? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+			? 'border-orange-500 bg-orange-50 text-orange-700'
 			: 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}"
 	>
-		<Folder class="h-8 w-8 {selectedProjectId === undefined ? 'text-indigo-500' : 'text-gray-400'}" />
+		<Folder
+			class="h-8 w-8 {selectedProjectId === undefined
+				? 'text-orange-500'
+				: 'text-gray-400'}"
+		/>
 		Others
 	</button>
 
@@ -33,13 +37,17 @@
 			class="flex flex-col items-center gap-2 rounded-xl border p-4 text-sm font-medium
 				transition-all hover:shadow-md
 				{selectedProjectId === project.id
-				? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+				? 'border-orange-500 bg-orange-50 text-orange-700'
 				: 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}"
 		>
 			<Folder
-				class="h-8 w-8 {selectedProjectId === project.id ? 'text-indigo-500' : 'text-gray-400'}"
+				class="h-8 w-8 {selectedProjectId === project.id
+					? 'text-orange-500'
+					: 'text-gray-400'}"
 			/>
-			<span class="truncate w-full text-center" title={project.title}>{project.title}</span>
+			<span class="truncate w-full text-center" title={project.title}
+				>{project.title}</span
+			>
 		</button>
 	{/each}
 </div>

@@ -41,7 +41,7 @@
 <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
 	<div class="w-full max-w-sm">
 		<div class="mb-8 text-center">
-			<h1 class="text-3xl font-bold text-indigo-600">Archivus</h1>
+			<h1 class="text-3xl font-bold text-orange-600">Archivus</h1>
 			<p class="mt-2 text-sm text-gray-500">Sign in to your account</p>
 		</div>
 
@@ -60,7 +60,7 @@
 						required
 						autocomplete="username"
 						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-							focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+							focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
 					/>
 				</div>
 
@@ -76,7 +76,7 @@
 						bind:value={pin}
 						inputmode="numeric"
 						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-							focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+							focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
 					/>
 				</div>
 
@@ -92,7 +92,7 @@
 						bind:value={password}
 						autocomplete="current-password"
 						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-							focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+							focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
 					/>
 				</div>
 
@@ -103,8 +103,8 @@
 				<button
 					type="submit"
 					disabled={loading}
-					class="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white
-						hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+					class="w-full rounded-lg bg-orange-600 py-2.5 text-sm font-semibold text-white
+						hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 				>
 					{loading ? "Signing in..." : "Sign in"}
 				</button>

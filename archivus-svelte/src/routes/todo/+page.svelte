@@ -95,7 +95,7 @@
 			{#if loading}
 				<div class="flex items-center justify-center py-12">
 					<div
-						class="h-6 w-6 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"
+						class="h-6 w-6 animate-spin rounded-full border-4 border-orange-200 border-t-orange-600"
 					/>
 				</div>
 			{:else}
