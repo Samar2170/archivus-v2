@@ -16,10 +16,12 @@ SERVICE_DIR="/etc/systemd/system"
 LAUNCHD_DIR="$HOME/Library/LaunchAgents"
 
 rm -rf "$BIN_DIR/$PROJECT_NAME"
-rm -rf "$INSTALL_DIR/frontend"
+# rm -rf "$INSTALL_DIR/frontend"
+rm -rf "$INSTALL_DIR/frontend-v2"
 
 mkdir -p "$INSTALL_DIR"
-mkdir -p "$INSTALL_DIR/frontend"
+# mkdir -p "$INSTALL_DIR/frontend"
+mkdir -p "$INSTALL_DIR/frontend-v2"
 mkdir -p "$BIN_DIR"
 
 echo "Installing $PROJECT_NAME..."
@@ -66,11 +68,14 @@ sudo chmod +x "$BIN_DIR/$PROJECT_NAME"
 
 
 # Copy frontend files
-cp -r dist/frontend/* "$INSTALL_DIR/frontend/"
-cp -r dist/frontend/.next "$INSTALL_DIR/frontend/.next"
-cp -r dist/frontend/public "$INSTALL_DIR/frontend/public"
-cd "$INSTALL_DIR/frontend"
-npm install --production
+# cp -r dist/frontend/* "$INSTALL_DIR/frontend/"
+# cp -r dist/frontend/.next "$INSTALL_DIR/frontend/.next"
+# cp -r dist/frontend/public "$INSTALL_DIR/frontend/public"
+# cd "$INSTALL_DIR/frontend"
+# npm install --production
+
+# Copy frontend-v2 (Svelte) files
+cp -r dist/frontend-v2/* "$INSTALL_DIR/frontend-v2/"
 
 cd "$HOME"
 sudo chmod -R 777 "$INSTALL_DIR"
@@ -97,17 +102,35 @@ WantedBy=multi-user.target
 EOF
 
 
-sudo bash -c "cat > $SERVICE_DIR/archivus_client.service" <<EOF
+# sudo bash -c "cat > $SERVICE_DIR/archivus_client.service" <<EOF
+# [Unit]
+# Description=archivus-client Next.js Frontend
+# After=network.target
+
+# [Service]
+# WorkingDirectory=$HOME/archivus-v2/frontend
+# ExecStart=/usr/bin/npm start
+# Restart=always
+# User=$USER
+# Group=$GROUP
+
+# [Install]
+# WantedBy=multi-user.target
+# EOF
+
+
+sudo bash -c "cat > $SERVICE_DIR/archivus_client_v2.service" <<EOF
 [Unit]
-Description=archivus-client Next.js Frontend
+Description=archivus-client-v2 Svelte Frontend
 After=network.target
 
 [Service]
-WorkingDirectory=$HOME/archivus-v2/frontend
-ExecStart=/usr/bin/npm start
+WorkingDirectory=$HOME/archivus-v2/frontend-v2
+ExecStart=/usr/bin/node index.js
 Restart=always
 User=$USER
 Group=$GROUP
+Environment=PORT=3001
 
 [Install]
 WantedBy=multi-user.target
@@ -121,12 +144,15 @@ EOF
 if [ "$OS" = "Linux" ]; then
     sudo systemctl daemon-reload
     sudo systemctl enable archivus_v2.service
-    sudo systemctl enable archivus_client.service
+    # sudo systemctl enable archivus_client.service
+    sudo systemctl enable archivus_client_v2.service
     sudo systemctl start archivus_v2.service
-    sudo systemctl start archivus_client.service
+    # sudo systemctl start archivus_client.service
+    sudo systemctl start archivus_client_v2.service
 
     sudo systemctl restart archivus_v2.service
-    sudo systemctl restart archivus_client.service
+    # sudo systemctl restart archivus_client.service
+    sudo systemctl restart archivus_client_v2.service
     echo "Systemd services installed and started."
 fi
 

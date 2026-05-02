@@ -5,7 +5,7 @@ DIST_DIR=dist
 BIN_DIR=$(DIST_DIR)/bin
 PKG_DIR=$(DIST_DIR)/packages
 
-build: build-backend build-frontend
+build: build-backend build-frontend-v2
 
 build-backend:
 	@echo "Building Backend..."
@@ -29,6 +29,13 @@ build-frontend:
 	cp -r archivus-client/.next $(DIST_DIR)/frontend/
 	cp archivus-client/package.json $(DIST_DIR)/frontend/
 	cp -r archivus-client/public $(DIST_DIR)/frontend/
+
+build-frontend-v2:
+	@echo "Building Frontend v2 (Svelte)..."
+	rm -rf $(DIST_DIR)/frontend-v2
+	mkdir -p $(DIST_DIR)/frontend-v2
+	cd archivus-svelte && npm run build
+	cp -r archivus-svelte/build/* $(DIST_DIR)/frontend-v2/
 
 package: build
 	@echo "Packaging Release..."
