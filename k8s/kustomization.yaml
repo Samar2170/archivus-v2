@@ -1,0 +1,14 @@
+# Kustomization lets you apply all manifests with one command: kubectl apply -k k8s/
+# Resources are applied in the order listed — namespace first so everything else has somewhere to live.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml           # Creates the "archivus" namespace — must come first
+  - secret.yaml              # Config file with secrets — mounted into the backend pod
+  - pvc.yaml                 # Persistent disk for the SQLite database and uploaded files
+  - backend-deployment.yaml  # Runs the Go backend server
+  - backend-service.yaml     # Internal DNS name for the backend (archivus-backend:8000)
+  - frontend-deployment.yaml # Runs the SvelteKit frontend
+  - frontend-service.yaml    # Internal DNS name for the frontend (archivus-frontend:3000)
+  - ingress.yaml             # Exposes frontend and backend to the internet via nginx

@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress   # The front door to the cluster. Routes external HTTP/S traffic to internal Services
+                # based on hostname and path rules. Requires an Ingress Controller (e.g. ingress-nginx)
+                # to be installed on the cluster.
+metadata:
+  name: archivus
+  namespace: archivus
+  annotations:
+    # Annotations configure the specific ingress controller (nginx in this case).
+    nginx.ingress.kubernetes.io/proxy-body-size: "10g"    # Allow uploads up to 10GB — matches the original nginx.conf limit.
+                                                           # Without this, nginx would reject large file uploads with 413.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300" # Wait up to 300 seconds for the backend to respond.
+                                                           # Large file uploads or slow processing need extra time.
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300" # Wait up to 300 seconds for the client to finish sending data.
+
+spec:
+  ingressClassName: nginx   # Which Ingress Controller to use. "nginx" = ingress-nginx.
+                             # Run "kubectl get ingressclass" to see what's available on your cluster.
+  rules:
+    # Rule 1: Frontend — serves the SvelteKit UI
+    - host: archivus.your-domain.com   # Replace with your actual domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix   # Match any path starting with "/" (i.e. everything)
+            backend:
+              service:
+                name: archivus-frontend   # Forward to the frontend Service
+                port:
+                  number: 3000
+
+    # Rule 2: Backend API — serves the Go REST API
+    - host: api.archivus.your-domain.com   # Replace with your actual API domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: archivus-backend   # Forward to the backend Service
+                port:
+                  number: 8000
+
+  # TLS — enables HTTPS. Requires cert-manager (for automatic Let's Encrypt certs)
+  # or a manually created TLS secret. Uncomment to enable.
+  # tls:
+  #   - hosts:
+  #       - archivus.your-domain.com
+  #       - api.archivus.your-domain.com
+  #     secretName: archivus-tls   # Name of a Secret containing tls.crt and tls.key

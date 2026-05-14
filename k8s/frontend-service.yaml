@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: archivus-frontend   # Ingress routes traffic to this Service by this name
+  namespace: archivus
+spec:
+  selector:
+    app: archivus-frontend   # Sends traffic to pods with this label (matches the frontend Deployment)
+
+  ports:
+    - protocol: TCP
+      port: 3000        # Port other services use to talk to the frontend (e.g. archivus-frontend:3000)
+      targetPort: 3000  # Port on the pod to forward to (must match the container's PORT env var)
+
+  type: ClusterIP   # Internal-only — the Ingress is the public entry point, not this Service directly

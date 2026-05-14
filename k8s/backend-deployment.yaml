@@ -1,0 +1,72 @@
+apiVersion: apps/v1   # API group for workload resources like Deployment, StatefulSet
+kind: Deployment      # Manages a set of identical pods; handles restarts and rollouts automatically
+metadata:
+  name: archivus-backend
+  namespace: archivus
+  labels:
+    app: archivus-backend   # Labels are key/value tags — used by the Service to find these pods
+
+spec:
+  replicas: 1   # Run exactly 1 pod. SQLite doesn't support concurrent writes from multiple processes,
+                # so we must keep this at 1. If you migrate to Postgres you can safely increase this.
+
+  selector:
+    matchLabels:
+      app: archivus-backend   # Deployment manages pods that have this label — must match template.metadata.labels below
+
+  template:                   # Blueprint for every pod this Deployment creates
+    metadata:
+      labels:
+        app: archivus-backend   # Applied to each pod; the Service selector uses this to route traffic here
+    spec:
+      containers:
+        - name: backend
+          image: archivus-backend:latest   # Docker image to run — build with: docker build -f Dockerfile.backend
+          imagePullPolicy: IfNotPresent    # Use the local image if it exists; don't pull from a registry.
+                                           # Change to "Always" when pushing to a remote registry.
+          ports:
+            - containerPort: 8000   # The port the Go server listens on inside the container (must match config.prod.yaml)
+
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.prod.yaml   # Where inside the container the config file appears
+              subPath: config.prod.yaml           # Mount only this key from the secret, not the whole directory
+              readOnly: true                      # The app only reads config, never writes it
+
+            - name: data
+              mountPath: /data   # The persistent volume is available at /data inside the container.
+                                 # The config points logs, DB, and files here so they survive pod restarts.
+
+          livenessProbe:
+            # Kubernetes restarts the pod if this probe fails repeatedly (pod is stuck/crashed)
+            httpGet:
+              path: /health      # The backend's health check endpoint
+              port: 8000
+            initialDelaySeconds: 10   # Wait 10s after startup before the first check (give the server time to boot)
+            periodSeconds: 30         # Check every 30 seconds
+
+          readinessProbe:
+            # Kubernetes stops sending traffic to this pod until this probe passes (pod not yet ready)
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5    # Start checking sooner than liveness — pod might be ready quickly
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 100m      # 100 millicores = 0.1 CPU cores — minimum guaranteed for scheduling
+              memory: 128Mi  # 128 MiB RAM guaranteed
+            limits:
+              cpu: 500m      # Pod is throttled if it tries to use more than 0.5 cores
+              memory: 512Mi  # Pod is killed (OOMKilled) if it exceeds 512 MiB
+
+      volumes:
+        - name: config
+          secret:
+            secretName: archivus-backend-config   # Pulls from the Secret defined in secret.yaml;
+                                                   # the "config.prod.yaml" key becomes a file in the mount
+
+        - name: data
+          persistentVolumeClaim:
+            claimName: archivus-data   # Binds to the PVC defined in pvc.yaml

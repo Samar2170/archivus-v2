@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: archivus-frontend
+  namespace: archivus
+  labels:
+    app: archivus-frontend
+
+spec:
+  replicas: 1   # Can be increased (frontend is stateless), but 1 is fine to start
+
+  selector:
+    matchLabels:
+      app: archivus-frontend
+
+  template:
+    metadata:
+      labels:
+        app: archivus-frontend
+    spec:
+      containers:
+        - name: frontend
+          # PUBLIC_API_URL is baked into the image at build time — it becomes part of the compiled JS
+          # bundle that runs in the user's browser. You cannot change it without rebuilding the image.
+          # Build with: docker build -f Dockerfile.frontend --build-arg PUBLIC_API_URL=https://api.archivus.your-domain.com
+          image: archivus-frontend:latest
+          imagePullPolicy: IfNotPresent   # Use local image; change to "Always" with a remote registry
+
+          ports:
+            - containerPort: 3000   # SvelteKit adapter-node listens on this port (set by PORT env var below)
+
+          env:
+            - name: PORT
+              value: "3000"        # Tells the SvelteKit Node.js server which port to bind to
+            - name: HOST
+              value: "0.0.0.0"    # Bind to all interfaces inside the container so Kubernetes can reach it
+                                   # (default is 127.0.0.1 which would block external traffic)
+
+          livenessProbe:
+            httpGet:
+              path: /        # Check the homepage — if this fails repeatedly, the pod gets restarted
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+
+          readinessProbe:
+            httpGet:
+              path: /        # Pod won't receive traffic until this passes (ensures the server is ready)
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 50m       # Frontend is lightweight — 0.05 cores is enough at low traffic
+              memory: 64Mi
+            limits:
+              cpu: 200m      # Cap at 0.2 cores
+              memory: 256Mi

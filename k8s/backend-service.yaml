@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service      # A stable network endpoint in front of pods.
+                   # Pods come and go (restarts, rollouts), but the Service IP/DNS name stays constant.
+metadata:
+  name: archivus-backend   # Other pods (and the ingress) reach the backend at "archivus-backend:8000" inside the cluster
+  namespace: archivus
+spec:
+  selector:
+    app: archivus-backend   # Forward traffic to pods that have this label (matches the Deployment's pod labels)
+
+  ports:
+    - protocol: TCP
+      port: 8000        # Port that OTHER services use to talk to this Service (e.g. archivus-backend:8000)
+      targetPort: 8000  # Port on the actual pod container to forward to (must match containerPort in the Deployment)
+
+  type: ClusterIP   # Only reachable from inside the cluster — not exposed to the internet.
+                    # The Ingress is what exposes it externally. Use NodePort or LoadBalancer only for direct external access.

@@ -1,0 +1,30 @@
+# Stage 1: Build the Go binary
+FROM golang:1.24-bookworm AS builder
+
+RUN apt-get update && apt-get install -y gcc sqlite3 libsqlite3-dev && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+COPY archivus-v2/go.mod archivus-v2/go.sum ./
+RUN go mod download
+
+COPY archivus-v2/ .
+
+RUN CGO_ENABLED=1 GOOS=linux go build -o archivus-v2 .
+
+# Stage 2: Minimal runtime image
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y ca-certificates libsqlite3-0 && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /build/archivus-v2 ./archivus-v2
+RUN chmod +x ./archivus-v2
+
+# Persistent data is mounted at /data by k8s
+RUN mkdir -p /data/files /data/logs
+
+EXPOSE 8000
+
+CMD ["./archivus-v2", "server", "-m", "prod"]

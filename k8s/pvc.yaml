@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim   # Requests a chunk of persistent storage from the cluster.
+                               # Unlike a pod's filesystem, this disk survives pod restarts and redeployments.
+metadata:
+  name: archivus-data          # Name referenced in the backend deployment's volumes section
+  namespace: archivus
+spec:
+  accessModes:
+    - ReadWriteOnce   # Only one pod can mount this volume at a time (required for SQLite — no concurrent writers).
+                      # Use ReadWriteMany only if your storage class supports it and you switch to a real database.
+  resources:
+    requests:
+      storage: 20Gi   # How much disk space to reserve. Increase this based on how many files you expect to store.
+
+  # storageClassName: standard
+  # Uncomment and set this to match your cluster's available storage class.
+  # Run "kubectl get storageclass" to see what's available.
+  # If omitted, the cluster's default storage class is used (works fine on most managed clusters like GKE/EKS/AKS).

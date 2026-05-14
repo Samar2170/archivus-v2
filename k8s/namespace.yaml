@@ -1,0 +1,4 @@
+apiVersion: v1        # Kubernetes API version for core resources like Namespace, Pod, Service
+kind: Namespace       # Creates an isolated workspace — all archivus resources will live inside this
+metadata:
+  name: archivus      # The name of this namespace; used in every other manifest as "namespace: archivus"
